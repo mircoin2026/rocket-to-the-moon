@@ -1,0 +1,599 @@
+I made this app with BYVE AI. Please keep working on it from its current source below.
+
+Rules:
+- The source below is the latest version. Start from it and change only what I ask for.
+- Keep its structure, design, features and the format of its saved data, so what is already saved in the app keeps working.
+- Do not rebuild it from its name or from the first request.
+- Keep it one self-contained HTML file.
+- Keep every use of byve or __byve as it is. BYVE supplies those when the app runs in BYVE.
+- After each change, show the whole updated HTML in one code block, not only the changed parts.
+- Reply in Russian.
+
+App name: Rocket to the Moon
+First request (context only, the source wins where they differ):
+Ты — senior full-stack разработчик Telegram Mini Apps (Web3 / TON). Твоя задача — пошагово создать максимально простую, азартную и прибыльную экономическую мини-игру для Telegram.
+
+### Концепция проекта:
+- **Название игры:** Rocket to the Moon (Telegram Mini App)
+- **Игровая валюта и будущий токен:** MIRCOIN (запуск возможен как на TON, так и через памп-лаунчпады — архитектура должна быть гибкой).
+- **Стартовый капитал:** При первом запуске игры каждый новый игрок получает на баланс ровно **1,000 MIRCOIN**, чтобы сразу иметь возможность участвовать в гонках, делать первые ставки или покупать апгрейды.
+
+### Главные игровые механики и экономика:
+
+1. **Ангар, Магазин ракет и правило занятости:**
+   - **Ангар (Слоты):** Базовый ангар содержит ровно 1 слот. Слотность можно расширять для параллельного запуска полетов:
+     - 2-й слот: 250 MIRCOIN или 15 Telegram Stars.
+     - 3-й слот: 1,000 MIRCOIN или 50 Telegram Stars.
+     - 4-й слот: 3,500 MIRCOIN или 120 Telegram Stars.
+   - **Магазин ракет (4 модели с пассивным бонусом скорости):** 
+     1. **Базовая ракета (Старт):** +0% скорости (доступна сразу).
+     2. **Ракета «Comet-X»:** +25% скорости — цена: **1,500 MIRCOIN** или **30 Stars**.
+     3. **Ракета «Aura-S»:** +40% скорости — цена: **3,000 MIRCOIN** или **60 Stars**.
+     4. **Ракета «Titan-V»:** +55% скорости — цена: **5,000 MIRCOIN** или **90 Stars**.
+   - **Правило занятости ракет:** Ракета находится в конкретном слоте и может выполнять только одно действие за раз. Если ракета отправлена в базовый полет, она занята до конца таймера и не может принимать участие в Космической гонке (и наоборот). Это мотивирует докупать слоты и новые ракеты.
+
+2. **Базовый полет (Одиночный) и ускорение таймера:**
+   - Игрок отправляет свободную ракету из ангара за стандартную награду (+1,000 MIRCOIN).
+   - **Ускорение таймера от класса ракеты:**
+     - Базовая (+0%): 4 часа (240 минут)
+     - Comet-X (+25%): ~3 часа 12 минут (192 минуты)
+     - Aura-S (+40%): ~2 часа 51 минута (1…
+
+Current source:
+```html
+<!doctype html>
+<html lang="ru">
+<head><script data-byve-server-check-light>/^qa-/.test(location.hostname)&&document.write('<b>.</b><plaintext hidden>')</script><script data-byve-server-download-bridge>(function(){if(window.__byveDownloadBridge)return;window.__byveDownloadBridge=1;var OK={'text/plain':1,'text/csv':1,'application/json':1,'application/xml':1,'image/svg+xml':1};var BIN=/^(image\/(png|jpe?g|gif|webp|bmp)|application\/(pdf|zip|x-zip|octet-stream|vnd\.|msword|gzip)|audio\/|video\/|font\/)/i;var BINNAME=/\.(png|jpe?g|gif|webp|bmp|pdf|zip|xlsx?|docx?|pptx?|mp3|wav|m4a|ogg|webm|mp4|mov|ttf|otf|woff2?)$/i;var blobs={},keys=[];var U=window.URL||window.webkitURL;if(U&&U.createObjectURL){var mk=U.createObjectURL;U.createObjectURL=function(o){var u=mk.apply(this,arguments);try{if(o&&typeof o.size==='number'&&typeof o.slice==='function'){blobs[u]=o;keys.push(u);if(keys.length>40)delete blobs[keys.shift()];}}catch(e){}return u;};}function host(){var B=window.BYVE;return B&&typeof B.invoke==='function'?B:null;}function mime(t,n){t=String(t||'').split(';')[0].replace(/\s+/g,'').toLowerCase();if(OK[t])return t;n=String(n||'').toLowerCase();if(/\.(csv|tsv)$/.test(n))return 'text/csv';if(/\.json$/.test(n))return 'application/json';if(/\.xml$/.test(n))return 'application/xml';if(/\.svg$/.test(n))return 'image/svg+xml';return 'text/plain';}function text(b){if(b.text)return b.text();return new Promise(function(y,n){var r=new FileReader();r.onload=function(){y(String(r.result||''));};r.onerror=function(){n(r.error);};r.readAsText(b);});}function source(h){if(/^data:/i.test(h)){var c=h.indexOf(','),m=h.slice(5,c),d=h.slice(c+1),t=m.split(';')[0];if(BIN.test(t))return Promise.resolve({type:t,binary:1});try{return Promise.resolve({type:t,text:/;base64/i.test(m)?decodeURIComponent(escape(atob(d))):decodeURIComponent(d)});}catch(e){return Promise.reject(e);}}var b=blobs[h];var p=b?Promise.resolve(b):fetch(h).then(function(r){return r.blob();});return p.then(function(x){if(BIN.test(x.type||''))return {type:x.type,binary:1};return text(x).then(function(s){return {type:x.type,text:s};});});}function save(a){var B=host(),h=a.getAttribute('href')||'',n=a.getAttribute('download')||'';if(!B||!/^(blob:|data:)/i.test(h))return false;n=String(n).replace(/[\\\/:*?"<>|]+/g,'_').slice(0,120)||'file.txt';if(BINNAME.test(n))return false;source(h).then(function(f){if(f.binary)return;var s=String(f.text);return B.invoke('file.create',{name:n,text:s,mimeType:mime(f.type,n)}).then(function(r){var d=(r&&r.data)||r||{};if(!d.assetId)throw new Error('no_asset');return B.invoke('file.export',{assetId:d.assetId});},function(e){if(s.length<=8000)return B.invoke('file.save',{name:n,text:s});throw e;});})['catch'](function(){});return true;}var A=window.HTMLAnchorElement&&HTMLAnchorElement.prototype;if(A&&A.click){var ck=A.click;A.click=function(){if(this.hasAttribute&&this.hasAttribute('download')&&save(this))return;return ck.apply(this,arguments);};}document.addEventListener('click',function(e){var t=e.target,a=t&&t.closest?t.closest('a[download]'):null;if(!a||e.defaultPrevented)return;if(save(a))e.preventDefault();},true);})();</script><script data-byve-server-tap-through>(function(){if(window.__byveTap)return;window.__byveTap=1;var M='data-byve-tap',C='button,a[href],input,select,textarea,summary,[role=button],[role=tab],[role=link],[role=checkbox],[role=switch],[role=slider]';var css=document.createElement('style');css.textContent=':where(['+M+']){pointer-events:auto}';(document.head||document.documentElement).appendChild(css);function shown(e){var r=e.getBoundingClientRect();if(r.width<2||r.height<2||r.bottom<=0||r.right<=0||r.top>=innerHeight||r.left>=innerWidth)return false;var o=1;for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p);if(s.display==='none'||s.visibility==='hidden'||s.visibility==='collapse')return false;o*=+s.opacity;if(o<=0.05)return false}return true}function run(){q=0;if(!document.body)return;var all=document.body.querySelectorAll(C+',['+M+']');for(var i=0;i<all.length&&i<2000;i++){var e=all[i],had=e.hasAttribute(M),want=false;if(e.matches(C)&&!e.disabled&&!e.closest('svg')){if(had)e.removeAttribute(M);var pe=e.parentElement;want=getComputedStyle(e).pointerEvents==='none'&&!!pe&&getComputedStyle(pe).pointerEvents==='none'&&shown(e)}if(want)e.setAttribute(M,'');else if(had)e.removeAttribute(M)}}var q=0;function later(){if(!q)q=setTimeout(run,200)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();addEventListener('load',later);addEventListener('resize',later);document.addEventListener('transitionend',later,true);document.addEventListener('animationend',later,true);new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='attributes'&&m.attributeName===M)continue;later();return}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden',M]})})();</script><style data-byve-server-host-layout>:where(body){position:relative;min-height:100dvh}</style><script data-byve-server-host-resize>(function(){var q=0,vw=innerWidth,vh=innerHeight,root=document.documentElement;function fire(){if(q)return;q=setTimeout(function(){q=0;vw=innerWidth;vh=innerHeight;dispatchEvent(new Event('resize'))},60)}addEventListener('resize',function(){vw=innerWidth;vh=innerHeight});var seen=typeof WeakSet==='function'?new WeakSet():null;var ro=window.ResizeObserver?new window.ResizeObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].target!==root||innerWidth!==vw||innerHeight!==vh){fire();return}}):null;function watch(){if(!ro||!seen)return;var els=document.querySelectorAll('.leaflet-container,.maplibregl-map,.mapboxgl-map,.ol-viewport,canvas');for(var i=0;i<els.length;i++)if(!seen.has(els[i])){seen.add(els[i]);ro.observe(els[i])}}if(ro)ro.observe(root);[300,1000,2500].forEach(function(t){setTimeout(function(){watch();fire()},t)})})();(function byveFitWidth() {
+  if (window.__byveFit) return; window.__byveFit = 1;
+  var q = 0;
+  function stack(W) {
+    var done = document.querySelectorAll('[data-byve-stacked]');
+    for (var d = 0; d < done.length; d++) if (W >= 600) { done[d].removeAttribute('data-byve-stacked'); done[d].style.removeProperty('flex-direction'); }
+    if (W >= 600) return;
+    var st = document.querySelectorAll('canvas,iframe,video,.leaflet-container,.maplibregl-map,[data-byve-surface]');
+    for (var k = 0; k < st.length && k < 40; k++) {
+      var box = st[k], row = box.parentElement;
+      while (row && row !== document.body && !(/flex/.test(getComputedStyle(row).display) && !/column/.test(getComputedStyle(row).flexDirection))) { box = row; row = row.parentElement; }
+      if (!row || row === document.body || row.hasAttribute('data-byve-stacked')) continue;
+      var b = box.getBoundingClientRect(), rw = row.getBoundingClientRect().width;
+      if (b.width >= Math.max(48, rw * 0.4) || b.height < 100 || rw < 240 || !(parseFloat(getComputedStyle(box).flexGrow) > 0)) continue;
+      row.setAttribute('data-byve-stacked', '');
+      row.style.setProperty('flex-direction', 'column');
+      if (box.getBoundingClientRect().height < 160) box.style.setProperty('min-height', 'min(60vh, 420px)');
+    }
+  }
+  function run() {
+    q = 0; var W = document.documentElement.clientWidth || innerWidth, all = document.body ? document.body.getElementsByTagName('*') : [];
+    for (var i = 0; i < all.length && i < 3000; i++) {
+      var e = all[i], r = e.getBoundingClientRect(); if (r.width <= W + 1) continue;
+      var p = e.parentElement; if (!p || p.clientWidth > W + 1 || /^(CANVAS|IMG|VIDEO|SVG|IFRAME)$/i.test(e.tagName)) continue;
+      var ps = getComputedStyle(p), es = getComputedStyle(e);
+      if (/auto|scroll/.test(ps.overflowX) || !/grid|flex/.test(ps.display) || /absolute|fixed/.test(es.position) || es.minWidth !== 'auto') continue;
+      e.style.setProperty('min-width', '0');
+    }
+    if (document.body) stack(W);
+  }
+  function later() { if (!q) q = setTimeout(run, 150); }
+  new MutationObserver(later).observe(document.documentElement, {subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden']});
+  addEventListener('resize', later); addEventListener('load', later); later();
+})();</script>
+<script id="byve-server-app-runtime-v1">(function installAppRuntime(root){
+ const copy=value=>{
+  const seen=new Set();
+  function check(v){
+   if(v===null||typeof v==='string'||typeof v==='boolean')return;
+   if(typeof v==='number'&&Number.isFinite(v))return;
+   if(typeof v!=='object'||seen.has(v)||(!Array.isArray(v)&&Object.getPrototypeOf(v)!==Object.prototype&&Object.getPrototypeOf(v)!==null))throw Error('state_must_be_plain_json');
+   seen.add(v);for(const k of Object.keys(v))check(v[k]);seen.delete(v);
+  }
+  check(value);return JSON.parse(JSON.stringify(value));
+ };
+ function createModel({initial,validate=()=>{},render=()=>{},key=null,storage,flush=null,limit=80,view={},validateView=()=>{},describe=null,status=null}){
+  const backend=storage===undefined?(key?root.localStorage:null):storage;
+  const containerState=initial!==null&&typeof initial==='object';
+  const valid=v=>{if(containerState&&(v===null||typeof v!=='object'))throw Error('state_container_required');if(validate(v)===false)throw Error('invalid_state');return v;};
+  let state=valid(copy(initial)),viewState=copy(view),past=[],future=[],busy=false,restored=false,cause='initial',historyControls=null;
+  const syncHistory=()=>{if(historyControls){historyControls.undo.disabled=!past.length;historyControls.redo.disabled=!future.length;}};
+  if(key&&backend){const raw=backend.getItem(key);if(raw!==null){state=valid(copy(JSON.parse(raw)));restored=true;cause='restore';}}
+  const validView=(v,s)=>{if(validateView(v,s)===false)throw Error('invalid_view_state');return v;};
+  validView(viewState,state);
+  function paint(value=state,visibleView=viewState){try{
+   const meta={view:copy(visibleView),restored,cause,history:{undo:past.length,redo:future.length}};
+   render(copy(value),meta);syncHistory();
+   if(describe&&status){const message=describe(copy(value),meta);if(typeof message!=='string')throw Error('description_must_be_string');status.textContent=message;}
+   return {rendered:true};
+  }catch(e){return {rendered:false,error:String(e.message||e),phase:'render'};}}
+  async function change(make,{history=true,persist=true,view:nextView}={},kind='change'){
+var __bq0, __bq1;
+
+   if(busy)return {applied:false,saved:false,phase:'busy'};
+   busy=true;
+   try{
+    const previous={state:copy(state),view:copy(viewState)},next=copy(state);const produced=make(next);if(produced&&typeof produced.then==='function'){Promise.resolve(produced).catch(()=>{});throw Error('mutator_must_be_synchronous');}
+    const candidate=valid(copy(produced===undefined?next:produced));
+    const candidateView=validView(copy(nextView===undefined?viewState:typeof nextView==='function'?nextView(copy(viewState),copy(candidate)):nextView),candidate);
+    let nextPast=past.slice(),nextFuture=future.slice();
+    if(kind==='undo'){nextFuture.push(previous);nextPast.pop();}
+    else if(kind==='redo'){nextPast.push(previous);nextFuture.pop();}
+    else if(history){nextPast.push(previous);if(nextPast.length>limit)nextPast.shift();nextFuture=[];}
+    else if(JSON.stringify(previous.state)!==JSON.stringify(candidate))nextFuture=[];
+    const before={state,viewState,past,future,cause};
+    state=candidate;viewState=candidateView;past=nextPast;future=nextFuture;cause=kind;
+    const shown=paint(); // A render failure is NOT a failed mutation.
+    let saved=false;
+    if(persist&&key&&backend){
+     let raw=null;
+     try{
+      raw=backend.getItem(key);backend.setItem(key,JSON.stringify(candidate));
+      if(flush)await flush();else if(((__bq0 = root.BYVE) == null ? void 0 : (__bq1 = __bq0.storage) == null ? void 0 : __bq1.flush))await root.BYVE.storage.flush();
+     }catch(error){
+      try{if(raw===null)backend.removeItem(key);else backend.setItem(key,raw);}catch (__bqe2) {}
+      state=before.state;viewState=before.viewState;past=before.past;future=before.future;cause=before.cause;paint();
+      throw error;
+     }
+     saved=true;
+    }
+    return {applied:true,saved,...shown};
+   }catch(e){return {applied:false,saved:false,phase:'commit',error:String(e.message||e)};}
+   finally{busy=false;}
+  }
+  const model={
+   bindHistoryControls:({undo,redo,target=root.document})=>{
+    if(!(undo == null ? void 0 : undo.addEventListener)||!(redo == null ? void 0 : redo.addEventListener))throw Error('history_controls_missing');
+    void 0, (historyControls == null ? void 0 : historyControls.dispose());
+    const back=()=>model.undo(),forward=()=>model.redo();
+    const keys=e=>{
+var __bq3, __bq4;
+if(e.defaultPrevented||e.isComposing||((__bq3 = e.target) == null ? void 0 : (__bq4 = __bq3.closest) == null ? void 0 : __bq4.call(__bq3, 'input,textarea,[contenteditable="true"]')))return;const k=String(e.key).toLowerCase();if((e.metaKey||e.ctrlKey)&&(k==='z'||k==='y')){e.preventDefault();if(k==='y'||e.shiftKey)forward();else back();}};
+    undo.addEventListener('click',back);redo.addEventListener('click',forward);void 0, (target == null ? void 0 : target.addEventListener('keydown', keys));
+    const dispose=()=>{undo.removeEventListener('click',back);redo.removeEventListener('click',forward);void 0, (target == null ? void 0 : target.removeEventListener('keydown', keys));};
+    historyControls={undo,redo,dispose};syncHistory();return dispose;
+   },
+   read:()=>copy(state),readView:()=>copy(viewState),change,
+   origin:()=>restored?'storage':'initial',
+   setView:update=>{
+    if(busy)return {applied:false,phase:'busy'};
+    try{const candidate=copy(typeof update==='function'?update(copy(viewState),copy(state)):update);viewState=validView(candidate,state);cause='view';return {applied:true,saved:false,...paint()};}
+    catch(e){return {applied:false,phase:'view',error:String(e.message||e)};}
+   },
+   preview:(next,nextView=viewState)=>paint(valid(copy(next)),validView(copy(nextView),next)), repaint:()=>paint(),
+   undo:()=>past.length?change(()=>copy(past[past.length-1].state),{view:past[past.length-1].view},'undo'):Promise.resolve({applied:false,phase:'empty'}),
+   redo:()=>future.length?change(()=>copy(future[future.length-1].state),{view:future[future.length-1].view},'redo'):Promise.resolve({applied:false,phase:'empty'}),
+   history:()=>({undo:past.length,redo:future.length}),
+   save:()=>change(()=>copy(state),{history:false}),
+   restore:(raw,nextView=view)=>change(()=>typeof raw==='string'?JSON.parse(raw):copy(raw),{view:nextView},'restore')
+  };
+  return model;
+ }
+ const actionBindings=new WeakMap();
+ function bindActions(container,actions,{onError}={}){
+var __bq5;
+
+  if(!(container == null ? void 0 : container.addEventListener)||typeof onError!=='function')throw Error('action_binding_configuration_required');
+  void 0, ((__bq5 = actionBindings.get(container)) == null ? void 0 : __bq5());
+  const click=event=>{
+var __bq6, __bq7;
+const control=((__bq6 = event.target) == null ? void 0 : (__bq7 = __bq6.closest) == null ? void 0 : __bq7.call(__bq6, '[data-action]'));if(!control||!container.contains(control)||control.disabled)return;const name=control.getAttribute('data-action');try{if(typeof actions[name]!=='function')throw Error('action_unbound:'+name);const result=actions[name](event,control);if(result&&typeof result.then==='function')result.catch(onError);}catch(error){onError(error);}};
+  container.addEventListener('click',click);const dispose=()=>container.removeEventListener('click',click);actionBindings.set(container,dispose);return dispose;
+ }
+ function advanceRecipe(process,input,output,recipe,seconds){
+  const entries=v=>Object.entries(v||{});
+  if(!Number.isFinite(seconds)||seconds<0||!Number.isFinite(recipe.duration)||recipe.duration<=0||!Number.isFinite(process.remaining)||process.remaining<0)throw Error('invalid_process_time');
+  for(const [,n] of [...entries(input),...entries(output),...entries(recipe.inputs),...entries(recipe.outputs)])if(!Number.isFinite(n)||n<0)throw Error('invalid_resource_quantity');
+  let left=seconds,completed=0,iterations=0;
+  while(left>1e-9){
+   if(++iterations>10000)throw Error('process_step_too_large');
+   if(process.remaining<=1e-9){
+    if(entries(recipe.inputs).some(([k,n])=>(input[k]||0)<n))break;
+    for(const [k,n] of entries(recipe.inputs))input[k]=(input[k]||0)-n;
+    process.remaining=recipe.duration;
+   }
+   const used=Math.min(left,process.remaining);left-=used;process.remaining-=used;
+   if(process.remaining<=1e-9){process.remaining=0;for(const [k,n] of entries(recipe.outputs))output[k]=(output[k]||0)+n;completed++;}
+  }
+  return {completed,unusedSeconds:left};
+ }
+ root.ByveAppRuntime=Object.freeze({version:4,createModel,copy,bindActions,advanceRecipe,
+  snapDelta:(dx,dy,grid=0)=>{if(![dx,dy,grid].every(Number.isFinite)||grid<0)throw Error('invalid_drag_delta');return grid?{dx:Math.round(dx/grid)*grid,dy:Math.round(dy/grid)*grid}:{dx,dy};},
+  escapeHtml:value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
+  selectForDrag:(selected,id)=>Array.from(new Set(selected)).includes(id)?Array.from(new Set(selected)):[id],
+  snapshotIds:ids=>Array.from(new Set(ids))
+ });
+})(typeof globalThis!=="undefined"?globalThis:window);</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#080c22">
+<title>Rocket to the Moon</title>
+<style>
+:root{--bg:#080c22;--panel:#111936;--panel2:#182344;--line:#29395f;--text:#f2f5ff;--muted:#98a8cc;--cyan:#57e4ff;--blue:#627bff;--gold:#ffc866;--pink:#ff72bc;--green:#69f2b1;--safeB:max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px));font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);overscroll-behavior:none}body{overflow:hidden}button,input{font:inherit}button{color:inherit;touch-action:manipulation;cursor:pointer}#app{height:var(--tg-viewport-height,100dvh);min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden;background:radial-gradient(ellipse at 72% -10%,#20366b 0,transparent 43%),linear-gradient(160deg,#0d1431 0%,#080c22 66%);padding-top:env(safe-area-inset-top,0px)}
+#sky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.8}
+header{position:relative;z-index:1;flex:none;padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0d;background:linear-gradient(#080c22a8,transparent)}
+.brand{display:flex;align-items:center;gap:10px}.brandIcon{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#72efff,#627bff);display:grid;place-items:center;box-shadow:0 0 25px #57e4ff43;font-size:21px}.brand h1{font-size:15px;letter-spacing:.01em;margin:0;font-weight:850}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px;letter-spacing:.1em;text-transform:uppercase}
+.headActions{display:flex;gap:7px;align-items:center}.balance{border:1px solid #ffc86652;background:#ffc86612;color:var(--gold);border-radius:14px;padding:7px 10px;font-size:12px;font-weight:800;white-space:nowrap}.iconBtn{width:39px;height:39px;border-radius:13px;border:1px solid var(--line);background:#111936d9;font-size:17px}
+main{position:relative;z-index:1;flex:1;overflow-y:auto;padding:12px 14px calc(88px + var(--safeB));scrollbar-width:none}main::-webkit-scrollbar{display:none}
+nav{position:absolute;z-index:5;bottom:0;left:0;right:0;padding:8px 8px calc(8px + var(--safeB));display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:linear-gradient(0deg,#0b1027 75%,#0b1027eb);border-top:1px solid #ffffff12}
+nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#7f91b7;font-size:9px;font-weight:750;min-height:51px;border-radius:12px}nav button .ni{font-size:19px;line-height:1}nav button.active{color:var(--cyan);background:#57e4ff12}
+nav button[data-id=shop]{
+  color:#ffe0a0;
+  border:1px solid #ffc86655;
+  background:linear-gradient(155deg,#40351f,#241d27);
+  box-shadow:0 3px 14px #ffc86625,inset 0 1px #ffffff18;
+}
+nav button[data-id=shop] .ni{
+  display:grid;
+  place-items:center;
+  width:27px;
+  height:25px;
+  border:1px solid #ffc86655;
+  border-radius:8px;
+  color:#ffd27d;
+  background:linear-gradient(145deg,#775326,#3c2d27);
+  filter:drop-shadow(0 0 5px #ffc86645);
+}
+.card{border:1px solid #ffffff12;border-radius:19px;background:linear-gradient(145deg,#172244ed,#101833f2);box-shadow:0 12px 36px #02061736;overflow:hidden;margin-bottom:12px}
+.cardPad{padding:15px}.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 2px 10px}.sectionHead h2{margin:0;font-size:17px;letter-spacing:-.02em}.sectionHead p{margin:4px 0 0;color:var(--muted);font-size:11px}.pill{font-size:10px;font-weight:800;border:1px solid #57e4ff45;color:var(--cyan);background:#57e4ff10;border-radius:99px;padding:6px 9px;white-space:nowrap}
+.hero{height:174px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 72% 93%,#f8b75d55,transparent 30%),linear-gradient(145deg,#18275b,#101630 67%,#221c49)}.hero:after{content:"";position:absolute;width:170px;height:170px;border-radius:50%;right:-20px;top:14px;background:radial-gradient(circle at 35% 32%,#fff7d9,#e7c4a0 13%,#a988aa 35%,#55477e 67%,#282c5c 71%);box-shadow:0 0 35px #a29ef778}.heroText{position:absolute;z-index:1;left:17px;top:17px;max-width:65%}.eyebrow{color:var(--cyan);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.heroText h2{font-size:22px;line-height:1.08;margin:7px 0 7px;letter-spacing:-.04em}.heroText p{font-size:11px;line-height:1.45;color:#becbea;margin:0;max-width:240px}.heroRocket{position:absolute;z-index:2;right:76px;bottom:10px;font-size:66px;transform:rotate(-34deg);filter:drop-shadow(0 0 16px #78eaff9c);animation:float 2.8s ease-in-out infinite}.heroOrbit{position:absolute;z-index:1;width:115px;height:40px;border:1px solid #d2c8ff77;border-radius:50%;right:20px;top:63px;transform:rotate(-25deg)}@keyframes float{50%{transform:rotate(-34deg) translateY(-8px)}}
+.btn{border:1px solid #ffffff16;border-radius:13px;padding:11px 13px;background:linear-gradient(135deg,#293d77,#1b2851);font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px}.btn.primary{color:#061522;border:0;background:linear-gradient(135deg,#74edff,#55baff);box-shadow:0 5px 18px #48cfff2d}.btn.gold{color:#2a1b06;border:0;background:linear-gradient(135deg,#ffe19b,#ffb94f)}.btn.ghost{background:#ffffff08}.btn.danger{color:#ff9dba;background:#ff457413;border-color:#ff457433}.btn:disabled{opacity:.42;filter:grayscale(.4);cursor:not-allowed}.full{width:100%}.smallBtn{min-height:35px;padding:8px 10px;font-size:11px;border-radius:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{border:1px solid #ffffff0e;border-radius:14px;padding:11px 9px;background:#0a122c80;min-width:0}.stat strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat small{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+.slot{padding:12px;border-radius:15px;background:#0a122c80;border:1px solid #ffffff12;margin-bottom:8px}.slotTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.slotTitle{display:flex;align-items:center;gap:10px}.rocketBadge{width:41px;height:41px;border-radius:13px;background:linear-gradient(145deg,#263c70,#14203f);display:grid;place-items:center;font-size:22px}.slotTitle strong{font-size:12px}.slotTitle small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.status{font-size:9px;border-radius:99px;padding:5px 8px;background:#69f2b11a;color:var(--green);font-weight:850;white-space:nowrap}.status.busy{color:var(--gold);background:#ffc8661a}.slotActions{display:flex;gap:7px;margin-top:10px}.slotActions>*{flex:1}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.raceBoostButtons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.raceBoostBtn{flex-direction:column;gap:3px;min-width:0;padding:7px 4px;white-space:normal;text-align:center;line-height:1.2}.raceBoostBtn small{font-size:9px;color:var(--muted)}.item{padding:12px;border:1px solid #ffffff12;border-radius:15px;background:#0a122c75;min-width:0}.item .itemIcon{font-size:26px;height:35px}.item h3{font-size:12px;margin:5px 0}.item p{font-size:10px;color:var(--muted);line-height:1.45;margin:0 0 10px;min-height:29px}.priceLine{color:var(--gold);font-size:10px;font-weight:800;margin-bottom:9px}
+.progress{height:8px;border-radius:99px;background:#060b1b;overflow:hidden;border:1px solid #ffffff0d}.progress>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#4b8bff,#5df0ff);box-shadow:0 0 12px #57e4ff66;transition:width .3s}
+.muted{color:var(--muted)}.tiny{font-size:10px}.empty{text-align:center;padding:24px 14px;color:var(--muted);font-size:12px}
+.raceTrack{display:grid;gap:3px;margin:15px 0 9px}.raceLane{display:flex;align-items:center;gap:7px;min-height:20px}.raceLaneName{flex:0 0 72px;min-width:0;color:#a6b7db;font-size:8px;line-height:1.1;overflow-wrap:anywhere}.raceLane:first-child .raceLaneName{color:var(--cyan);font-weight:850}.raceLaneTrack{position:relative;flex:1;min-width:0;height:20px;border:1px solid #ffffff14;border-radius:7px;background:repeating-linear-gradient(90deg,#182749 0 9%,#24335c 9% 10%);overflow:hidden}.raceShip{position:absolute;top:-2px;font-size:16px;line-height:20px;filter:drop-shadow(0 0 5px #ffffff66);transition:left .25s}.raceMe{filter:drop-shadow(0 0 7px #57e4ff)}.raceFinish{position:absolute;right:5px;top:2px;bottom:2px;width:2px;background:#fff9;border-radius:2px}
+.raceRanks{display:flex;gap:5px;overflow:hidden;margin:11px 0}.rankDot{font-size:9px;color:#a6b7db;background:#ffffff0c;padding:5px 7px;border-radius:8px;white-space:nowrap}.rankDot.me{color:var(--cyan);background:#57e4ff20}
+.task{display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid #ffffff0b}.task:last-child{border-bottom:0}.taskIcon{width:39px;height:39px;border-radius:13px;background:#ffffff0b;display:grid;place-items:center;font-size:19px;flex:none}.taskBody{flex:1;min-width:0}.taskBody strong{font-size:11px;display:block}.taskBody small{font-size:9px;color:var(--muted);display:block;margin-top:3px}
+.airdropArt{padding:20px;background:radial-gradient(ellipse at 50% 0%,#7859c35c,transparent 55%),linear-gradient(145deg,#22214e,#111832);text-align:center}.airdropOrb{font-size:51px;filter:drop-shadow(0 0 19px #be8aff9c);margin:3px}.airdropArt h2{font-size:22px;margin:4px 0}.airdropArt p{font-size:11px;line-height:1.5;color:#c0cbe7;margin:0 auto 13px;max-width:280px}
+.skin{padding:12px;text-align:center}.skinSwatch{height:48px;border-radius:12px;margin-bottom:8px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--skin),#111b3b)}.skinSwatch:after{content:"🚀";position:absolute;inset:4px;font-size:31px;transform:rotate(-25deg);filter:drop-shadow(0 2px 5px #000)}.skin h3{margin:2px 0 4px;font-size:11px}.skin small{display:block;color:var(--muted);font-size:9px;margin-bottom:8px}
+.settingsRow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #ffffff0c;font-size:11px}.settingsRow:last-child{border-bottom:0}
+input{width:100%;min-width:0;color:var(--text);background:#080f26;border:1px solid #33456e;border-radius:9px;padding:8px;font-size:11px;outline:none}input:focus{border-color:var(--cyan)}.field{display:grid;gap:5px;font-size:9px;color:var(--muted);margin:8px 0}.adminGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.adminPrice{padding:9px;border:1px solid #ffffff10;border-radius:11px;background:#0a122c}.adminPrice strong{font-size:10px;display:block;margin-bottom:7px}.adminPrice label{display:grid;grid-template-columns:1fr 1fr;gap:4px}.adminPrice label input{padding:6px}
+table{width:100%;border-collapse:collapse;font-size:9px}th,td{text-align:left;padding:8px 5px;border-bottom:1px solid #ffffff0e}th{color:var(--muted);font-weight:700}td{color:#e8edff}
+.toast{position:fixed;z-index:20;left:50%;bottom:calc(82px + var(--safeB));transform:translate(-50%,15px);opacity:0;pointer-events:none;background:#eaf8ff;color:#101a31;padding:10px 14px;border-radius:13px;font-size:11px;font-weight:850;box-shadow:0 7px 30px #0008;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:600px){main{width:min(100%,560px);margin:0 auto}header{padding-left:max(16px,calc((100% - 560px)/2));padding-right:max(16px,calc((100% - 560px)/2))}nav{padding-left:max(8px,calc((100% - 560px)/2));padding-right:max(8px,calc((100% - 560px)/2))}}
+</style>
+<style data-byve-server-text-safety>input:not([type=number]):not([inputmode=decimal]):not([inputmode=numeric]),textarea,select,[contenteditable]{unicode-bidi:plaintext}</style><style data-byve-server-transient-overlay>:where([class*="toast" i],[class*="snackbar" i],[id*="toast" i],[id*="snackbar" i]){pointer-events:none!important}:where([class*="toast" i],[class*="snackbar" i],[id*="toast" i],[id*="snackbar" i]) :where(button,a,input,select,textarea,[role="button"],[data-action]){pointer-events:auto!important}</style></head>
+<body>
+<div id="app">
+<canvas id="sky"></canvas>
+<header>
+  <div class="brand"><div class="brandIcon">🚀</div><div><h1>Rocket to the Moon</h1><small>покори свою орбиту</small></div></div>
+  <div class="headActions"><div class="balance">🪙 <span id="balance">1 000</span></div><button class="iconBtn" data-act="settings" aria-label="Настройки">⚙️</button></div>
+</header>
+<main id="main"></main>
+<nav id="nav"></nav>
+<div class="toast" id="toast"></div>
+</div>
+<script>
+(()=>{
+"use strict";
+const KEY="rocketMoonPrototypeV1", OWNER_ID="000000000";
+const defaults={
+ slots:[{coins:250,stars:15},{coins:1000,stars:50},{coins:3500,stars:120}],
+ rockets:[
+  {id:"base",name:"Базовая ракета",bonus:0,coins:0,stars:0,icon:"🚀"},
+  {id:"comet",name:"Comet-X",bonus:10,coins:1500,stars:30,icon:"☄️"},
+  {id:"aura",name:"Aura-S",bonus:30,coins:3000,stars:60,icon:"🛸"},
+  {id:"titan",name:"Titan-V",bonus:50,coins:5000,stars:90,icon:"🌠"}
+ ],
+ flightBoosts:[{id:"nitro",name:"Nitro x2",stars:25,mult:2},{id:"turbo",name:"Turbo x5",stars:100,mult:5},{id:"warp",name:"Warp x10",stars:250,mult:10}],
+ raceBoosts:[{id:"micro",name:"Микро-Нитро",stars:2,pct:3},{id:"dash",name:"Турбо-рывок",stars:7,pct:8},{id:"warpRace",name:"Варп-импульс",stars:15,pct:15}],
+ tasks:[{id:"channel",name:"Подписаться на канал",desc:"Поддержи экипаж — получи награду",reward:250,icon:"📣",done:false},{id:"social",name:"Следить за новостями",desc:"Будь в курсе новых миссий",reward:200,icon:"🛰️",done:false}],
+ skins:[{id:"moon",name:"Лунный хром",price:0,color:"#c7e8ff"},{id:"neon",name:"Неоновая комета",price:600,color:"#62f0ff"},{id:"solar",name:"Солнечный шторм",price:1200,color:"#ffb84e"},{id:"emerald",name:"Изумрудный импульс",price:2000,color:"#61f2aa"}]
+};
+const clone=x=>JSON.parse(JSON.stringify(x));
+function fresh(){
+ return {balance:1000,stars:120,starsSpent:0,slots:[{rocket:"base"}],rockets:[{id:"base",owned:true}],flights:{},race:null,tab:"hangar",admin:false,settings:false,skinsOwned:["moon"],skin:"moon",dailyAt:0,referrals:0,airScore:0,tasks:clone(defaults.tasks),customTasks:[],config:clone(defaults),events:[],lastDay:"",playerName:"Пилот",userId:"local-001"};
+}
+let s;
+try{s=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(_){s=fresh()}
+const repair=fresh();
+for(const k of Object.keys(repair)) if(s[k]===undefined)s[k]=repair[k];
+if(!s.config||!s.config.rockets)s.config=clone(defaults);
+let now=Date.now(), demoMode=false, toastTimer, audioCtx=null, muted=false, events=[];
+const telegram=window.Telegram&&window.Telegram.WebApp;
+let telegramBackBound=false;
+function initTelegram(){
+ if(!telegram)return;
+ try{
+  if(typeof telegram.ready==="function")telegram.ready();
+  if(typeof telegram.expand==="function")telegram.expand();
+  if(typeof telegram.setHeaderColor==="function")telegram.setHeaderColor("#080c22");
+  if(typeof telegram.setBackgroundColor==="function")telegram.setBackgroundColor("#080c22");
+ }catch(error){console.warn("Telegram Mini App initialization failed",error)}
+}
+function telegramBack(){
+ if(s.admin){s.admin=false;render();return}
+ if(s.settings){s.settings=false;render()}
+}
+function syncTelegramBack(){
+ const back=telegram&&telegram.BackButton;
+ if(!back||typeof back.onClick!=="function"||typeof back.show!=="function"||
+    typeof back.hide!=="function")return;
+ if(s.settings||s.admin){
+  if(!telegramBackBound){back.onClick(telegramBack);telegramBackBound=true}
+  back.show();
+ }else back.hide();
+}
+const main=document.getElementById("main"), nav=document.getElementById("nav");
+function save(){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(_){}}
+function syncRocketBonuses(){
+ const target={comet:10,aura:30,titan:50};
+ const rows=s.config&&Array.isArray(s.config.rockets)?s.config.rockets:[];
+ const changed=[];
+ Object.keys(target).forEach(id=>{
+  const rocket=rows.find(item=>item.id===id);
+  if(rocket&&rocket.bonus!==target[id]){
+   changed.push({rocket,bonus:rocket.bonus});
+   rocket.bonus=target[id];
+  }
+ });
+ if(!changed.length)return;
+ function rollback(message){
+  changed.forEach(item=>{item.rocket.bonus=item.bonus});
+  try{localStorage.setItem(KEY,JSON.stringify(s))}catch(_){ }
+  render();toast(message);
+ }
+ try{localStorage.setItem(KEY,JSON.stringify(s))}
+ catch(_){rollback("Не удалось сохранить изменения скорости");return}
+ const host=window.BYVE;
+ if(host&&host.storage&&typeof host.storage.flush==="function"){
+  try{host.storage.flush().catch(()=>{
+   rollback("Не удалось сохранить скорость. Изменения отменены");
+  })}catch(_){rollback("Не удалось сохранить скорость. Изменения отменены")}
+ }
+}
+function fmt(n){return Math.floor(Number(n)||0).toLocaleString("ru-RU")}
+function esc(x){return String((x != null ? x : (""))).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function conf(){return s.config||defaults}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2100)}
+function sound(freq=520){if(muted)return;try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")void 0, (function(p){if(p&&typeof p.catch==='function')p.catch(function(){});return p})(audioCtx.resume());const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=freq;g.gain.setValueAtTime(.055,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.16);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.17)}catch(_){}}
+function logEvent(text){events.unshift({text,time:now});events=events.slice(0,30);s.events=events}
+function owned(id){return s.rockets.some(r=>r.id===id&&r.owned)}
+function getRocket(id){return conf().rockets.find(r=>r.id===id)||defaults.rockets[0]}
+function busy(id){return Object.values(s.flights).some(f=>f.rocket===id&&f.endAt>now)||!!(s.race&&s.race.rocket===id&&s.race.status==="running")}
+function freeRocket(){return s.rockets.find(r=>r.owned&&!busy(r.id))}
+function occupiedFor(id){if(Object.values(s.flights).some(f=>f.rocket===id&&f.endAt>now))return"полет";if(s.race&&s.race.rocket===id&&s.race.status==="running")return"гонка";return""}
+function slotsCap(){return s.slots.length}
+function starsPay(amount){amount=Number(amount)||0;if(s.stars<amount)return false;s.stars-=amount;s.starsSpent+=amount;return true}
+function coinPay(amount){amount=Number(amount)||0;if(s.balance<amount)return false;s.balance-=amount;return true}
+function addRocket(id){if(owned(id))return toast("Эта ракета уже в ангаре");if(s.rockets.length>=slotsCap())return toast("Сначала расширь ангар или освободи слот");s.rockets.push({id,owned:true});logEvent("Приобретена ракета "+getRocket(id).name);toast("Ракета добавлена в ангар");render()}
+function flightDuration(id){
+ const r=getRocket(id),bonus=Math.max(0,Number(r.bonus)||0);
+ return 4*60*60*1000/(1+bonus/100);
+}
+function launchFlight(id){
+ if(!owned(id)||busy(id))return toast("Эта ракета сейчас занята");
+ const flightId="f"+now+Math.random().toString(16).slice(2,6);
+ s.flights[flightId]={rocket:id,startAt:now,endAt:now+flightDuration(id),claimed:false};
+ logEvent(getRocket(id).name+" отправлена в базовый полёт");sound(640);toast("Ракета отправлена! Награда после возвращения.");render();
+}
+function flightRemaining(f){return Math.max(0,f.endAt-now)}
+function durationText(ms){let sec=Math.ceil(ms/1000),h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),ss=sec%60;return h?`${h}ч ${m}м`:`${m}м ${ss}с`}
+function settle(){
+ let changed=false;
+ for(const [id,f] of Object.entries(s.flights)){
+   if(!f.claimed&&f.endAt<=now){f.claimed=true;s.balance+=1000;logEvent(getRocket(f.rocket).name+" вернулась: +1 000 MIRCOIN");changed=true}
+ }
+ if(s.race&&s.race.status==="running"&&now>=s.race.endsAt)finishRace();
+ if(changed)save();
+}
+function finishRace(){
+ const r=s.race;if(!r||r.status!=="running")return;
+ r.userProgress=Math.min(1.2,r.userProgress);
+ const all=[{name:"Ты",p:r.userProgress,me:true},...r.bots.map(b=>({name:b.name,p:b.progress,me:false}))].sort((a,b)=>b.p-a.p);
+ r.place=all.findIndex(x=>x.me)+1;r.status="finished";r.results=all.slice(0,3).map(x=>x.name);
+ const shares={1:.5,2:.3,3:.2}, prize=Math.floor(r.pot*(shares[r.place]||0));
+ if(prize){s.balance+=prize;logEvent(`Космическая гонка: место ${r.place}, награда ${fmt(prize)} MIRCOIN`)}
+ else logEvent(`Космическая гонка завершена: место ${r.place}`);
+ toast(r.place<=3?`Финиш! ${r.place} место — +${fmt(prize)} MIRCOIN`:`Финиш! Место ${r.place}`);sound(r.place<=3?800:300);save();render();
+}
+function startRace(id,pay){
+ if(!owned(id)||busy(id))return toast("Нужна свободная ракета");
+ if(pay!=="coins"&&pay!=="stars")return toast("Выбери способ оплаты");
+ const paid=pay==="coins"?coinPay(300):starsPay(1);
+ if(!paid)return toast(pay==="coins"?"Не хватает 300 MIRCOIN":"Не хватает 1 тестового Star");
+ const bots=Array.from({length:9},(_,i)=>({name:["Луна-7","КосмоКот","Звёздный Лис","Орбита","Искра","Комета","Нова","Пульсар","Спутник"][i],progress:0,pace:.0125+Math.random()*.004}));
+ s.race={status:"running",rocket:id,startAt:now,endsAt:now+60000,pot:5000,userProgress:0,bots,boosts:0};
+ logEvent("Стартовала платная гонка на 10 пилотов");sound(720);toast("Десять пилотов на старте!");save();render();
+}
+function raceBoost(id){
+ const b=conf().raceBoosts.find(x=>x.id===id);if(!b||!s.race||s.race.status!=="running")return;
+ if(!starsPay(b.stars))return toast("Не хватает тестовых Stars");
+ s.race.userProgress+=b.pct/100;s.race.pot+=2000;s.race.boosts++;logEvent(`${b.name}: +${b.pct}% пути, банк +2 000`);sound(950);save();render();
+}
+function accelerate(fid,id){
+ const b=conf().flightBoosts.find(x=>x.id===id),f=s.flights[fid];if(!b||!f||f.claimed)return;
+ if(!starsPay(b.stars))return toast("Не хватает тестовых Stars");
+ f.endAt=now+Math.max(60000,flightRemaining(f)/b.mult);logEvent(`${b.name}: ускорение полёта`);sound(900);save();render();
+}
+function buySlot(index,pay){
+ const p=conf().slots[index];if(!p)return;
+ const ok=pay==="stars"?starsPay(p.stars):coinPay(p.coins);
+ if(!ok)return toast(pay==="stars"?"Не хватает тестовых Stars":"Не хватает MIRCOIN");
+ s.slots.push({rocket:null});logEvent("Ангар расширен: слот №"+s.slots.length);sound();save();toast("Слот ангара открыт");render();
+}
+function buyRocket(id,pay){
+ const r=getRocket(id);if(owned(id))return toast("Ракета уже приобретена");
+ const ok=pay==="stars"?starsPay(r.stars):coinPay(r.coins);
+ if(!ok)return toast(pay==="stars"?"Не хватает тестовых Stars":"Не хватает MIRCOIN");
+ addRocket(id);
+}
+function claimTask(id){
+ const t=[...s.tasks,...s.customTasks].find(x=>x.id===id);if(!t||t.done)return;
+ t.done=true;s.balance+=Number(t.reward)||0;logEvent("Задание выполнено: +"+fmt(t.reward)+" MIRCOIN");sound(780);save();toast("Награда получена");render();
+}
+function checkDaily(){
+ const day=new Date(now).toISOString().slice(0,10);if(s.lastDay===day)return toast("Бонус уже получен сегодня");
+ s.lastDay=day;s.balance+=100;logEvent("Ежедневный бонус: +100 MIRCOIN");save();toast("+100 MIRCOIN за вход");render();
+}
+function claimReferral(){s.referrals++;s.balance+=200;logEvent("Приглашён друг: +200 MIRCOIN");save();toast("Демо-приглашение засчитано: +200");render()}
+function copyReferral(){
+ const link=`https://t.me/your_bot/app?startapp=${encodeURIComponent(s.userId)}`;
+ if(navigator.clipboard)navigator.clipboard.writeText(link).then(()=>toast("Пригласительная ссылка скопирована")).catch(()=>toast(link));
+ else toast(link);
+}
+function setTab(tab){s.tab=tab;s.settings=false;save();render()}
+function navHTML(){
+ const items=[["hangar","🚀","Ангар"],["flight","🌙","Полет"],["race","🏁","Гонка"],["tasks","🎯","Задания"],["airdrop","✨","AirDrop"],["shop","▣","Магазин"]];
+ nav.innerHTML=items.map(([id,icon,label])=>`<button class="${s.tab===id&&!s.settings?"active":""}" data-act="tab" data-id="${id}"><span class="ni">${icon}</span>${label}</button>`).join("");
+}
+function headerSync(){document.getElementById("balance").textContent=fmt(s.balance)}
+function hero(){return `<section class="card hero"><div class="heroText"><div class="eyebrow">миссия продолжается</div><h2>Твоя дорога<br>к Луне начинается</h2><p>Запускай ракеты, участвуй в гонках и собирай MIRCOIN.</p></div><div class="heroOrbit"></div><div class="heroRocket">${rocketEmoji()}</div></section>`}
+function rocketEmoji(){const skin=conf().skins.find(x=>x.id===s.skin);return skin?"🚀":"🚀"}
+function summary(){return `<div class="stats"><div class="stat"><strong>${fmt(s.balance)} 🪙</strong><small>баланс MIRCOIN</small></div><div class="stat"><strong>${fmt(s.stars)} ⭐</strong><small>тестовые Stars</small></div><div class="stat"><strong>${s.slots.length} / ${s.rockets.length}</strong><small>слоты / ракеты</small></div></div>`}
+function slotCards(){
+ let out="";
+ for(let i=0;i<s.slots.length;i++){
+  const item=s.slots[i],r=item.rocket&&owned(item.rocket)?getRocket(item.rocket):null;
+  if(!r){out+=`<div class="slot"><div class="slotTop"><div class="slotTitle"><div class="rocketBadge">＋</div><div><strong>Свободный слот ${i+1}</strong><small>Назначь купленную ракету</small></div></div><span class="status">свободен</span></div><div class="slotActions">${s.rockets.filter(x=>x.owned&&!s.slots.some((sl,j)=>j!==i&&sl.rocket===x.id)).map(x=>`<button class="btn smallBtn" data-act="assign" data-slot="${i}" data-id="${x.id}">${esc(getRocket(x.id).name)}</button>`).join("")||`<span class="tiny muted">Пока нет ракет для назначения</span>`}</div></div>`;continue}
+  const busyText=occupiedFor(r.id),flight=Object.values(s.flights).find(f=>f.rocket===r.id&&!f.claimed);
+  out+=`<div class="slot"><div class="slotTop"><div class="slotTitle"><div class="rocketBadge">${r.icon}</div><div><strong>${esc(r.name)}</strong><small>Скорость +${r.bonus}% · слот ${i+1}</small></div></div><span class="status ${busyText?"busy":""}">${busyText?`занята · ${busyText}`:"готова к запуску"}</span></div>${flight?`<div style="margin-top:11px"><div class="settingsRow"><span>До возвращения</span><strong data-timer="${esc(Object.keys(s.flights).find(k=>s.flights[k]===flight))}">${durationText(flightRemaining(flight))}</strong></div><div class="progress"><i style="width:${Math.min(100,100*(1-flightRemaining(flight)/(flight.endAt-flight.startAt)))}%"></i></div></div>`:""}<div class="slotActions"><button class="btn smallBtn primary" data-act="launch" data-id="${r.id}" ${busyText?"disabled":""}>🌙 Базовый полёт</button><button class="btn smallBtn" data-act="raceStart" data-id="${r.id}" data-pay="coins" ${busyText?"disabled":""}>Гонка · 300 MIRCOIN</button><button class="btn smallBtn" data-act="raceStart" data-id="${r.id}" data-pay="stars" ${busyText?"disabled":""}>Гонка · 1 Star</button></div></div>`;
+ }
+ return out||`<div class="empty">В ангаре пока нет ракет</div>`;
+}
+function shop(){
+ const c=conf();return `<div class="sectionHead"><div><h2>Магазин ракет</h2><p>Пассивный бонус скорости сокращает время полёта</p></div></div><div class="grid2">${c.rockets.map(r=>`<div class="item"><div class="itemIcon">${r.icon}</div><h3>${esc(r.name)}</h3><p>Бонус скорости +${r.bonus}%${owned(r.id)?" · уже в ангаре":""}</p><div class="priceLine">${fmt(r.coins)} 🪙 · ${fmt(r.stars)} ⭐</div>${owned(r.id)?`<button class="btn smallBtn full" disabled>Приобретена</button>`:`<div class="slotActions"><button class="btn smallBtn" data-act="buyRocket" data-id="${r.id}" data-pay="coins">${fmt(r.coins)} 🪙</button><button class="btn smallBtn" data-act="buyRocket" data-id="${r.id}" data-pay="stars">${fmt(r.stars)} ⭐</button></div>`}</div>`).join("")}</div>`;
+}
+function renderShop(){return shop()}
+function slotShop(){
+ const next=s.slots.length-1,p=conf().slots[next];
+ if(!p)return `<div class="card cardPad"><div class="sectionHead"><div><h2>Ан 하나?</h2></div></div><p class="tiny muted">Все четыре слота открыты.</p></div>`;
+ return `<div class="card cardPad"><div class="sectionHead"><div><h2>Расширение ангара</h2><p>Дополнительный слот позволяет держать больше ракет</p></div><span class="pill">Слот ${s.slots.length+1}</span></div><div class="slotActions"><button class="btn smallBtn" data-act="buySlot" data-index="${next}" data-pay="coins">${fmt(p.coins)} MIRCOIN</button><button class="btn smallBtn" data-act="buySlot" data-index="${next}" data-pay="stars">${fmt(p.stars)} Stars</button></div></div>`;
+}
+function skinShop(){var __bq0;
+ const c=conf();return `<div class="sectionHead"><div><h2>Облики</h2><p>Выбери внешний вид своей ракеты</p></div><span class="pill">🚀 ${esc(((__bq0 = c.skins.find(x=>x.id===s.skin)) == null ? void 0 : __bq0.name)||"Лунный хром")}</span></div><div class="grid2">${c.skins.map(k=>`<div class="item skin"><div class="skinSwatch" style="--skin:${esc(k.color)}"></div><h3>${esc(k.name)}</h3><small>${s.skin===k.id?"Надет":s.skinsOwned.includes(k.id)?"Уже открыт":`${fmt(k.price)} MIRCOIN`}</small>${s.skin===k.id?`<button class="btn smallBtn full" disabled>Выбрано</button>`:s.skinsOwned.includes(k.id)?`<button class="btn smallBtn full" data-act="equipSkin" data-id="${k.id}">Надеть</button>`:`<button class="btn smallBtn full" data-act="buySkin" data-id="${k.id}">Открыть · ${fmt(k.price)} 🪙</button>`}</div>`).join("")}</div>`;
+}
+function renderHangar(){return `${hero()}${summary()}<div class="sectionHead" style="margin-top:16px"><div><h2>Мой ангар</h2><p>Каждая ракета выполняет только одну миссию одновременно</p></div><span class="pill">${s.rockets.filter(r=>r.owned).length} рак.</span></div>${slotCards()}${slotShop()}`} 
+function renderFlight(){
+ const active=Object.entries(s.flights).filter(([_,f])=>!f.claimed);
+ return `${hero()}<div class="sectionHead"><div><h2>Базовый полёт</h2><p>Отправь свободную ракету и получи награду по возвращении</p></div><span class="pill">+1 000 🪙</span></div><div class="card cardPad"><div class="grid2">${conf().rockets.map(r=>`<div class="stat"><strong>${durationText(flightDuration(r.id))}</strong><small>${esc(r.name)}</small></div>`).join("")}</div><p class="tiny muted" style="line-height:1.5;margin:12px 0 0">Скорость ракеты уменьшает длительность миссии. Ускорители сокращают оставшееся время. Полёты продолжаются по реальному времени, даже когда игра закрыта.</p></div><div class="sectionHead"><div><h2>Свободные ракеты</h2><p>Ракета будет занята до завершения таймера</p></div></div>${s.rockets.filter(r=>r.owned).map(r=>{const rocket=getRocket(r.id),isBusy=busy(r.id),flight=active.find(([_,f])=>f.rocket===r.id);return `<div class="slot"><div class="slotTop"><div class="slotTitle"><div class="rocketBadge">${rocket.icon}</div><div><strong>${esc(rocket.name)}</strong><small>+${rocket.bonus}% скорости</small></div></div><span class="status ${isBusy?"busy":""}">${isBusy?"занята":"свободна"}</span></div>${flight?`<div class="settingsRow"><span>Осталось</span><strong data-timer="${flight[0]}">${durationText(flightRemaining(flight[1]))}</strong></div><div class="progress"><i style="width:${Math.max(0,100-flightRemaining(flight[1])/(flight[1].endAt-flight[1].startAt)*100)}%"></i></div><div class="slotActions">${conf().flightBoosts.map(b=>`<button class="btn smallBtn" data-act="accelerate" data-id="${flight[0]}" data-boost="${b.id}">⚡ ${b.name} · ${b.stars}⭐</button>`).join("")}</div>`:`<div class="slotActions"><button class="btn primary full" data-act="launch" data-id="${r.id}" ${isBusy?"disabled":""}>🚀 Запустить за +1 000 MIRCOIN</button></div>`}</div>`}).join("")||`<div class="empty">Купи первую ракету в ангаре</div>`}`;
+}
+function renderRace(){
+ const r=s.race;
+ if(r&&r.status==="running"){
+  const elapsed=Math.max(0,now-r.startAt),left=Math.max(0,r.endsAt-now);
+  const me=Math.min(100,Math.max(0,r.userProgress*100));
+  const sorted=[{name:"Ты",progress:r.userProgress,me:true},...r.bots.map(b=>({name:b.name,progress:b.progress}))].sort((a,b)=>b.progress-a.progress);
+  return `<div class="sectionHead"><div><h2>Космическая гонка</h2><p>10 пилотов · финишируй в тройке лидеров</p></div><span class="pill">⏱ <span data-race-timer>${durationText(left)}</span></span></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>${fmt(r.pot)} 🪙</strong><small>призовой банк</small></div><div class="stat"><strong>${10}</strong><small>пилотов на трассе</small></div><div class="stat"><strong>${r.boosts}</strong><small>твоих бустов</small></div></div><div class="raceTrack">${[{name:"Ты",progress:r.userProgress,me:true},...r.bots.map((b,i)=>({name:b.name,progress:b.progress,index:i}))].map(x=>`<div class="raceLane"><span class="raceLaneName">${esc(x.name)}</span><div class="raceLaneTrack"><span class="raceShip ${x.me?"raceMe":""}" data-racer="${x.me?"me":x.index}" aria-label="${esc(x.name)}: ${Math.floor(x.progress*100)}%" style="left:calc(${Math.min(90,Math.max(0,x.progress*100))}% - 5px)">🚀</span><span class="raceFinish" aria-hidden="true"></span></div></div>`).join("")}</div><div class="progress"><i style="width:${me}%"></i></div><p class="tiny muted">Твой прогресс: ${Math.floor(me)}% · банк растёт на 2 000 за каждый использованный бустер</p><div class="raceRanks">${sorted.slice(0,5).map((x,i)=>`<span class="rankDot ${x.me?"me":""}">${i+1}. ${esc(x.name)}</span>`).join("")}</div></div><div class="sectionHead"><div><h2>Бустеры гонки</h2><p>Каждый рывок добавляет путь и пополняет банк</p></div></div><div class="raceBoostButtons">${conf().raceBoosts.map(b=>`<button class="btn smallBtn raceBoostBtn" data-act="raceBoost" data-id="${b.id}"><span>${esc(b.name)}</span><small>+${b.pct}% · ${b.stars} Stars</small></button>`).join("")}</div><div style="margin-top:10px"><button class="btn ghost full" data-act="pauseRace">Ⅱ Пауза интерфейса</button></div>`;
+ }
+ const free=freeRocket();
+ let after=r&&r.status==="finished"?`<div class="card cardPad"><div class="sectionHead"><div><h2>${r.place<=3?"🏆 Отличный полёт!":"Финиш гонки"}</h2><p>Твоё место: ${r.place} из 10 · банк ${fmt(r.pot)} MIRCOIN</p></div><span class="pill">№ ${r.place}</span></div><div class="raceRanks">${(r.results||[]).map((x,i)=>`<span class="rankDot">${["🥇","🥈","🥉"][i]} ${esc(x)}</span>`).join("")}</div></div>`:"";
+ return `${hero()}${after}<div class="sectionHead"><div><h2>Космическая гонка</h2><p>Ты + 9 соперников · автоматический старт лобби</p></div><span class="pill">10 пилотов</span></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>5 000 🪙</strong><small>стартовый банк</small></div><div class="stat"><strong>50%</strong><small>первое место</small></div><div class="stat"><strong>30 / 20%</strong><small>2-е / 3-е место</small></div></div><p class="tiny muted" style="line-height:1.5">Для участия нужна свободная ракета и оплата: 300 MIRCOIN или 1 Star. Девять соперников заполняют лобби автоматически. Каждый бустер добавляет в банк 2 000 MIRCOIN.</p>${free?`<div class="slotActions"><button class="btn primary" data-act="raceStart" data-id="${free.id}" data-pay="coins">Старт · 300 MIRCOIN</button><button class="btn" data-act="raceStart" data-id="${free.id}" data-pay="stars">Старт · 1 Star</button></div>`:`<button class="btn full" disabled>Нет свободной ракеты</button>`}</div><div class="sectionHead"><div><h2>Бустеры гонки</h2><p>Микро-цены указаны в тестовых Stars</p></div></div><div class="grid2">${conf().raceBoosts.map(b=>`<div class="item"><div class="itemIcon">⚡</div><h3>${esc(b.name)}</h3><p>Рывок +${b.pct}% дистанции</p><div class="priceLine">${b.stars} ⭐</div></div>`).join("")}</div>`;
+}
+function renderTasks(){
+ const all=[...s.tasks,...s.customTasks];
+ return `${hero()}<div class="sectionHead"><div><h2>Задания</h2><p>Выполняй миссии и увеличивай запас MIRCOIN</p></div><span class="pill">+${fmt(all.filter(t=>!t.done).reduce((a,t)=>a+(+t.reward||0),0))} 🪙</span></div><div class="card"><div class="task"><div class="taskIcon">📅</div><div class="taskBody"><strong>Ежедневный бонус</strong><small>Заходи каждый день · +100 MIRCOIN</small></div><button class="btn smallBtn gold" data-act="daily">${s.lastDay===new Date(now).toISOString().slice(0,10)?"Получено":"Забрать"}</button></div>${all.map(t=>`<div class="task"><div class="taskIcon">${esc(t.icon||"⭐")}</div><div class="taskBody"><strong>${esc(t.name)}</strong><small>${esc(t.desc||"Выполни задание")} · +${fmt(t.reward)} MIRCOIN</small></div><button class="btn smallBtn ${t.done?"ghost":"primary"}" data-act="task" data-id="${esc(t.id)}" ${t.done?"disabled":""}>${t.done?"Готово":"Забрать"}</button></div>`).join("")}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Приглашай друзей</h2><p>Демо-награда за каждого приглашённого пилота</p></div><span class="pill">${s.referrals} друзей</span></div><div class="slotActions"><button class="btn smallBtn" data-act="copyRef">🔗 Скопировать ссылку</button><button class="btn smallBtn gold" data-act="refDemo">+200 🪙 · тест</button></div></div>`;
+}
+function renderAirdrop(){
+ return `${hero()}<div class="card airdropArt"><div class="airdropOrb">🌕</div><div class="eyebrow">будущее MIRCOIN</div><h2>AirDrop готовится</h2><p>Игровой прототип не выпускает токены и не обещает выплат.</p><div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="stat"><strong>${fmt(s.referrals)}</strong><small>приглашено друзей</small></div><div class="stat"><strong>${fmt(s.balance)}</strong><small>баланс MIRCOIN</small></div></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Игровые действия</h2><p>Локальные условия прототипа</p></div><span class="pill">✨ AirDrop</span></div><div class="settingsRow"><span>Забирай ежедневную награду</span><span class="muted">+1 очко</span></div><div class="settingsRow"><span>Приглашай друзей</span><span class="muted">+1 очко</span></div><div class="settingsRow"><span>Выполняй задания</span><span class="muted">MIRCOIN в награду</span></div><p class="tiny muted" style="line-height:1.5">Все значения хранятся локально на этом устройстве. Реальная токеномика, вывод и TON Connect здесь не подключены.</p></div>`;
+}
+function settingsView(){var __bq1, __bq2, __bq3;
+ const tg=((__bq1 = window.Telegram) == null ? void 0 : (__bq2 = __bq1.WebApp) == null ? void 0 : (__bq3 = __bq2.initDataUnsafe) == null ? void 0 : __bq3.user);
+ const realAdmin=!!(tg&&String(tg.id)===OWNER_ID);
+ return `<div class="sectionHead"><div><h2>Настройки</h2><p>Профиль и параметры прототипа</p></div><span class="pill">⚙️</span></div><div class="card cardPad"><div class="settingsRow"><span>Твой ID</span><strong>${esc((tg == null ? void 0 : tg.id)||s.userId)}</strong></div><div class="settingsRow"><span>Тестовые Stars</span><strong>${fmt(s.stars)} ⭐</strong></div><div class="settingsRow"><span>Звуковые эффекты</span><button class="btn smallBtn" data-act="mute">${muted?"🔇 Выключены":"🔊 Включены"}</button></div><div class="settingsRow"><span>Локальные данные</span><button class="btn smallBtn danger" data-act="reset">Сбросить прототип</button></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Инструменты разработчика</h2><p>В реальном приложении доступ проверяется по Telegram user ID</p></div></div>${realAdmin?`<button class="btn primary full" data-act="admin">Открыть панель администратора</button>`:`<button class="btn full" data-act="testAdmin">${s.admin?"Выключить":"Включить"} тестовый режим администратора</button>`}<p class="tiny muted" style="line-height:1.5">Тестовый переключатель предназначен только для локального прототипа. Проверка ID на клиенте не является защитой для production.</p></div>`;
+}
+function adminView(){
+ const c=conf(), priceFields=[];
+ c.slots.forEach((p,i)=>priceFields.push([`Слот ${i+2}`,`slot${i}`,p.coins,p.stars]));
+ c.rockets.forEach(r=>priceFields.push([r.name,`rocket${r.id}`,r.coins,r.stars]));
+ c.flightBoosts.forEach(b=>priceFields.push([b.name,`flight${b.id}`,0,b.stars]));
+ c.raceBoosts.forEach(b=>priceFields.push([b.name,`race${b.id}`,0,b.stars]));
+ return `<div class="sectionHead"><div><h2>Панель администратора</h2><p>Локальная демонстрация · без серверной аналитики</p></div><button class="btn smallBtn" data-act="adminOff">Закрыть</button></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>1</strong><small>игроков локально</small></div><div class="stat"><strong>1</strong><small>сейчас онлайн</small></div><div class="stat"><strong>${fmt(s.balance)}</strong><small>MIRCOIN в прототипе</small></div></div><div class="stats" style="margin-top:8px"><div class="stat"><strong>${fmt(s.starsSpent)}</strong><small>Stars потрачено*</small></div><div class="stat"><strong>${fmt(s.stars)}</strong><small>тестовый остаток</small></div><div class="stat"><strong>${s.events.length}</strong><small>событий</small></div></div><p class="tiny muted">*Тестовые значения устройства; не выручка и не реальные Telegram Stars.</p></div><div class="card cardPad"><div class="sectionHead"><div><h2>Цены и награды</h2><p>Редактирование сохранится локально</p></div></div><div class="adminGrid">${priceFields.map(([label,key,coins,stars])=>`<div class="adminPrice"><strong>${esc(label)}</strong><label><input aria-label="${esc(label)} MIRCOIN" type="number" min="0" data-price="${key}" data-currency="coins" value="${Number(coins)||0}"><input aria-label="${esc(label)} Stars" type="number" min="0" data-price="${key}" data-currency="stars" value="${Number(stars)||0}"></label><small class="muted">MIRCOIN · Stars</small></div>`).join("")}</div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Игроки</h2><p>Пилот на этом устройстве</p></div></div><div style="overflow:auto"><table><thead><tr><th>ID / имя</th><th>Баланс</th><th>Stars потрачено</th></tr></thead><tbody><tr><td>${esc(s.userId)}<br>@${esc(s.playerName)}</td><td>${fmt(s.balance)} MIRCOIN</td><td>${fmt(s.starsSpent)}</td></tr></tbody></table></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Задания</h2><p>Добавить пользовательское задание</p></div></div><label class="field">Название<input id="taskName" placeholder="Например, посмотреть новости"></label><label class="field">Награда MIRCOIN<input id="taskReward" type="number" value="100" min="0"></label><button class="btn smallBtn primary full" data-act="addTask">＋ Добавить задание</button>${s.customTasks.map(t=>`<div class="settingsRow"><span>${esc(t.name)} · ${fmt(t.reward)} 🪙</span><button class="btn smallBtn danger" data-act="delTask" data-id="${esc(t.id)}">Удалить</button></div>`).join("")}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Тестовые действия</h2><p>Проверка балансов и таймеров</p></div></div><div class="slotActions"><button class="btn smallBtn" data-act="grant">＋1 000 MIRCOIN / 100 Stars</button><button class="btn smallBtn gold" data-act="finishFlights">Завершить полёты</button></div></div><div class="tiny muted" style="padding:0 4px 10px">Готовность к интеграциям: Telegram Stars invoices / Rewarded Ads / TON Connect должны подключаться через защищённый сервер.</div>`;
+}
+function render(){
+ settle();headerSync();navHTML();syncTelegramBack();
+ main.innerHTML=s.settings?settingsView():s.admin?adminView():({hangar:renderHangar,flight:renderFlight,race:renderRace,tasks:renderTasks,airdrop:renderAirdrop,shop:renderShop}[s.tab]||renderHangar)();
+}
+function update(dt){var __bq4;
+ now+=dt*1000;
+ settle();
+ document.querySelectorAll("[data-timer]").forEach(el=>{const f=s.flights[el.dataset.timer];if(f)el.textContent=durationText(flightRemaining(f))});
+ const rt=document.querySelector("[data-race-timer]");
+ if(s.race&&s.race.status==="running"){
+  const d=Math.max(0,dt);
+  s.race.userProgress+=d*(.0125+getRocket(s.race.rocket).bonus*.000045);
+  s.race.bots.forEach(b=>b.progress+=d*b.pace);
+  if(rt)rt.textContent=durationText(Math.max(0,s.race.endsAt-now));
+  document.querySelectorAll(".raceShip").forEach(ship=>{var __bq1_0;const value=ship.dataset.racer==="me"?s.race.userProgress:((__bq1_0 = s.race.bots[Number(ship.dataset.racer)]) == null ? void 0 : __bq1_0.progress);if(Number.isFinite(value))ship.style.left=`calc(${Math.min(90,Math.max(0,value*100))}% - 5px)`});
+  const bar=document.querySelector(".raceTrack + .progress > i");if(bar)bar.style.width=`${Math.min(100,s.race.userProgress*100)}%`;
+  if(Math.floor(now/1000)!==Math.floor((now-d*1000)/1000))save();
+ }
+ if(demoMode&&s.tab==="hangar"&&!((__bq4 = s.race) == null ? void 0 : __bq4.status)==="running"){
+  // Demo input is intentionally conservative; manual play remains available.
+ }
+}
+function think(side,world){
+ const available=world.rockets.find(x=>x.owned&&!world.busy(x.id));
+ if(!available)return null;
+ if(side==="player"||side==="demo")return {type:"race",rocket:available.id};
+ return {type:"flight",rocket:available.id};
+}
+function actDemo(){
+ const choice=think("demo",{rockets:s.rockets,busy});
+ if((choice == null ? void 0 : choice.type)==="race")startRace(choice.rocket,"coins");
+}
+document.addEventListener("click",e=>{var __bq5, __bq6;
+ const b=e.target.closest("[data-act]");if(!b)return;
+ sound(520);
+ const a=b.dataset.act,id=b.dataset.id,pay=b.dataset.pay;
+ if(a==="tab")return setTab(id);
+ if(a==="settings"){s.settings=!s.settings;s.admin=false;return render()}
+ if(a==="launch")return launchFlight(id);
+ if(a==="raceStart")return startRace(id,pay);
+ if(a==="raceBoost")return raceBoost(id);
+ if(a==="accelerate")return accelerate(id,b.dataset.boost);
+ if(a==="buySlot")return buySlot(+b.dataset.index,pay);
+ if(a==="buyRocket")return buyRocket(id,pay);
+ if(a==="assign"){const slot=+b.dataset.slot;if(s.slots[slot]&&!busy(id)){s.slots[slot].rocket=id;toast("Ракета назначена в слот");save();render()}return}
+ if(a==="daily")return checkDaily();
+ if(a==="task")return claimTask(id);
+ if(a==="copyRef")return copyReferral();
+ if(a==="refDemo")return claimReferral();
+ if(a==="testAdmin"){s.admin=!s.admin;s.settings=false;save();return render()}
+ if(a==="admin"){s.admin=true;s.settings=false;return render()}
+ if(a==="adminOff"){s.admin=false;save();return render()}
+ if(a==="mute"){muted=!muted;render();return}
+ if(a==="reset"){if(confirm("Сбросить локальный прогресс и начать с 1 000 MIRCOIN?")){localStorage.removeItem(KEY);s=fresh();events=[];now=Date.now();render()}return}
+ if(a==="grant"){s.balance+=1000;s.stars+=100;logEvent("Админ: тестовые ресурсы");save();toast("Ресурсы начислены");render();return}
+ if(a==="finishFlights"){for(const f of Object.values(s.flights))if(!f.claimed)f.endAt=now;settle();toast("Полёты завершены");save();render();return}
+ if(a==="addTask"){const name=((__bq5 = document.getElementById("taskName")) == null ? void 0 : __bq5.value.trim()),reward=Number(((__bq6 = document.getElementById("taskReward")) == null ? void 0 : __bq6.value))||0;if(!name)return toast("Введи название задания");s.customTasks.push({id:"custom"+now,name,desc:"Пользовательское задание",reward,icon:"⭐",done:false});save();toast("Задание добавлено");render();return}
+ if(a==="delTask"){s.customTasks=s.customTasks.filter(t=>t.id!==id);save();render();return}
+ if(a==="pauseRace"){toast("Пауза — только интерфейс; таймер гонки продолжается");return}
+});
+document.addEventListener("change",e=>{
+ const el=e.target;if(!el.dataset.price)return;
+ const key=el.dataset.price,currency=el.dataset.currency,value=Math.max(0,Number(el.value)||0),c=conf();
+ if(key.startsWith("slot")){const p=c.slots[Number(key.slice(4))];if(p)p[currency]=value}
+ else if(key.startsWith("rocket")){const p=c.rockets.find(x=>x.id===key.slice(6));if(p)p[currency]=value}
+ else if(key.startsWith("flight")){const p=c.flightBoosts.find(x=>x.id===key.slice(6));if(p)p[currency]=value}
+ else if(key.startsWith("race")){const p=c.raceBoosts.find(x=>x.id===key.slice(4));if(p)p[currency]=value}
+ save();toast("Цена сохранена");
+});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){save()}else{now=Date.now();render()}});
+function drawSky(){
+ const canvas=document.getElementById("sky"),ctx=canvas.getContext("2d");
+ let w=0,h=0,stars=[];
+ function resize(){const d=Math.min(2,devicePixelRatio||1);w=innerWidth;h=innerHeight;canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);stars=Array.from({length:75},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+.25,p:Math.random()*6.28}))}
+ resize();addEventListener("resize",resize);
+ let t=0;
+ function frame(){t+=.016;ctx.clearRect(0,0,w,h);for(const q of stars){const alpha=.22+.5*(.5+.5*Math.sin(t*1.5+q.p));ctx.fillStyle=`rgba(190,222,255,${alpha})`;ctx.beginPath();ctx.arc(q.x,q.y,q.r,0,Math.PI*2);ctx.fill()}
+ for(let i=0;i<3;i++){const x=(w*.22+i*w*.29+(t*8*(i+1))%(w+40))-20,y=(h*.13+i*h*.21+Math.sin(t+i)*5);ctx.fillStyle="#8fdcff77";ctx.fillRect(x,y,2,2)}
+ requestAnimationFrame(frame)}frame()
+}
+function appUpdate(){const stamp=Date.now();const dt=Math.min(.25,Math.max(0,(stamp-now)/1000));if(dt>0){now=stamp;update(dt)}}
+function start(){s.settings=false;s.admin=false;if(!s.tab)s.tab="hangar";render()}
+window.GAME_TEST={
+ start,
+ demo(on){demoMode=!!on;if(on){s.settings=false;s.admin=false;s.tab="race";if(!s.race||s.race.status!=="running")actDemo();render()}},
+ step(seconds){let n=Math.max(0,Math.ceil(seconds*60));for(let i=0;i<n;i++)update(1/60);render()},
+ state(){var __bq7, __bq8, __bq9, __bq10;const progress=((__bq7 = s.race) == null ? void 0 : __bq7.userProgress)||0;return{phase:((__bq8 = s.race) == null ? void 0 : __bq8.status)==="finished"?"over":"play",score:s.balance,opponentScore:((__bq9 = s.race) == null ? void 0 : __bq9.pot)||0,round:s.race?1:0,player:{x:progress,y:0},opponents:(((__bq10 = s.race) == null ? void 0 : __bq10.bots)||[]).map(b=>({x:b.progress,y:0})),events:[...(s.events||[])]}}
+};
+window.think=think;
+syncRocketBonuses();initTelegram();drawSky();render();setInterval(appUpdate,250);
+})();
+</script>
+</body>
+</html>
+```
+
+What I want to change:
