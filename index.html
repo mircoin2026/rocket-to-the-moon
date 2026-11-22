@@ -181,7 +181,7 @@ const CONFIG_BACKUP_KEY="rocketMoonConfigBackupV1";
 const OWNER_ID="8631686158";
 
 const defaults={
-  _v:2,
+  _v:4,
   slots:[{coins:250,stars:15},{coins:1000,stars:50},{coins:3500,stars:120}],
   rockets:[
     {id:"base",name:"Базовая ракета",bonus:0,coins:0,stars:0,icon:"🚀"},
@@ -223,8 +223,8 @@ const defaults={
   },
   referral:{
     baseUrl:"https://t.me/your_bot/app",
-    rewardCoins:200,
-    percent:10
+    rewardStars:5,
+    starsPercent:10
   }
 };
 
@@ -326,13 +326,15 @@ function normalizeConfig(raw){
   }
   if(raw.referral&&typeof raw.referral==="object"){
     const r=raw.referral;
+    const rawPct=r.starsPercent!=null?r.starsPercent:(r.percent!=null?r.percent:c.referral.starsPercent);
+    const rawStarsReward=r.rewardStars!=null?r.rewardStars:c.referral.rewardStars;
     c.referral={
       baseUrl:String(r.baseUrl||c.referral.baseUrl).trim()||defaults.referral.baseUrl,
-      rewardCoins:Math.max(0,Number(r.rewardCoins!=null?r.rewardCoins:c.referral.rewardCoins)||0),
-      percent:Math.min(100,Math.max(0,Number(r.percent!=null?r.percent:c.referral.percent)||0))
+      rewardStars:Math.max(0,Number(rawStarsReward)||0),
+      starsPercent:Math.min(100,Math.max(0,Number(rawPct)||0))
     };
   }
-  c._v=2;
+  c._v=4;
   return c;
 }
 
@@ -346,7 +348,6 @@ function safeUrl(raw){
 function fresh(){
   return {
     balance:1000,
-    stars:120,
     starsSpent:0,
     slots:[{rocket:"base"}],
     rockets:[{id:"base",owned:true}],
@@ -359,8 +360,8 @@ function fresh(){
     skin:"moon",
     dailyAt:0,
     referrals:0,
-    refPercent:defaults.referral.percent,
-    refEarned:0,
+    refStarsPercent:defaults.referral.starsPercent,
+    refStarsEarned:0,
     referredBy:"",
     airScore:0,
     tasks:clone(defaults.tasks),
@@ -379,30 +380,29 @@ const repair=fresh();
 for(const k of Object.keys(repair))if(s[k]===undefined)s[k]=repair[k];
 s.config=normalizeConfig(s.config);
 
-// Restore shared config backup if present
 try{
   const backup=JSON.parse(localStorage.getItem(CONFIG_BACKUP_KEY)||"null");
   if(backup&&typeof backup==="object"){
     if(backup.config)s.config=normalizeConfig(backup.config);
-    if(backup.refPercent!=null)s.config.referral.percent=Math.min(100,Math.max(0,Number(backup.refPercent)||0));
+    if(backup.refStarsPercent!=null)s.config.referral.starsPercent=Math.min(100,Math.max(0,Number(backup.refStarsPercent)||0));
   }
 }catch(_){}
 
-if(s.refPercent!==undefined&&Number.isFinite(Number(s.refPercent))){
-  const pct=Math.min(100,Math.max(0,Number(s.refPercent)));
+if(s.refStarsPercent!==undefined&&Number.isFinite(Number(s.refStarsPercent))){
+  const pct=Math.min(100,Math.max(0,Number(s.refStarsPercent)));
   if(!s.config.referral)s.config.referral=clone(defaults.referral);
-  if(s.config.referral.percent==null)s.config.referral.percent=pct;
+  if(s.config.referral.starsPercent==null)s.config.referral.starsPercent=pct;
 }
-s.refPercent=Math.min(100,Math.max(0,Number(s.config.referral.percent!=null?s.config.referral.percent:s.refPercent)||0));
-s.config.referral.percent=s.refPercent;
-s.refEarned=Math.max(0,Number(s.refEarned)||0);
+s.refStarsPercent=Math.min(100,Math.max(0,Number(s.config.referral.starsPercent!=null?s.config.referral.starsPercent:s.refStarsPercent)||0));
+s.config.referral.starsPercent=s.refStarsPercent;
+s.refStarsEarned=Math.max(0,Number(s.refStarsEarned)||0);
 if(typeof s.referredBy!=="string")s.referredBy="";
 s.tasks=(Array.isArray(s.tasks)?s.tasks:clone(defaults.tasks)).map(t=>normalizeTask(t,"own"));
 s.customTasks=(Array.isArray(s.customTasks)?s.customTasks:[]).map(t=>normalizeTask(t,"own"));
 
 let now=Date.now(), demoMode=false, toastTimer, audioCtx=null, muted=false;
 let events=Array.isArray(s.events)?s.events.slice(0,30):[];
-let serverStatus="local"; // "local" | "synced" | "offline"
+let serverStatus="local";
 let confirmResetUntil=0;
 const telegram=window.Telegram&&window.Telegram.WebApp;
 let telegramBackBound=false;
@@ -446,6 +446,14 @@ function getTelegramUserId(){
   const userId=typeof rawId==="number"?rawId:
     (typeof rawId==="string"&&/^\d{1,16}$/.test(rawId)?Number(rawId):NaN);
   return Number.isSafeInteger(userId)&&userId>0?String(userId):"";
+}
+
+function isInsideTelegramApp(){
+  const webApp=window.Telegram&&window.Telegram.WebApp;
+  if(!webApp)return false;
+  if(typeof webApp.initData==="string"&&webApp.initData.length>0)return true;
+  if(webApp.initDataUnsafe&&(webApp.initDataUnsafe.user||webApp.initDataUnsafe.chat||webApp.initDataUnsafe.start_param))return true;
+  return Boolean(webApp.platform&&webApp.platform!=="unknown");
 }
 
 function syncIdentity(){
@@ -504,11 +512,12 @@ async function apiCall(path,options){
 function getReferralConfig(){
   const c=conf();
   const r=c.referral||defaults.referral;
-  const pct=Math.min(100,Math.max(0,Number(r.percent!=null?r.percent:s.refPercent)||0));
+  const pct=Math.min(100,Math.max(0,Number(r.starsPercent!=null?r.starsPercent:(r.percent!=null?r.percent:s.refStarsPercent))||0));
+  const rewStars=Math.max(0,Number(r.rewardStars!=null?r.rewardStars:defaults.referral.rewardStars)||0);
   return {
     baseUrl:String(r.baseUrl||defaults.referral.baseUrl).trim()||defaults.referral.baseUrl,
-    rewardCoins:Math.max(0,Number(r.rewardCoins!=null?r.rewardCoins:defaults.referral.rewardCoins)||0),
-    percent:pct
+    rewardStars:rewStars,
+    starsPercent:pct
   };
 }
 
@@ -525,7 +534,7 @@ function saveConfigBackup(){
   try{
     localStorage.setItem(CONFIG_BACKUP_KEY,JSON.stringify({
       config:s.config,
-      refPercent:s.refPercent,
+      refStarsPercent:s.refStarsPercent,
       tasks:s.tasks,
       customTasks:s.customTasks,
       updatedAt:Date.now()
@@ -570,14 +579,14 @@ function applyServerBundle(data){
     applied=true;
   }
   const refPayload=data.referral&&typeof data.referral==="object"?data.referral:
-    (data.refBaseUrl!=null||data.refReward!=null||data.refPercent!=null?{
+    (data.refBaseUrl!=null||data.refRewardStars!=null||data.refStarsPercent!=null?{
       baseUrl:data.refBaseUrl,
-      rewardCoins:data.refReward,
-      percent:data.refPercent
+      rewardStars:data.refRewardStars,
+      starsPercent:data.refStarsPercent
     }:null);
   if(refPayload){
     s.config=normalizeConfig(Object.assign({},s.config,{referral:Object.assign({},getReferralConfig(),refPayload)}));
-    s.refPercent=s.config.referral.percent;
+    s.refStarsPercent=s.config.referral.starsPercent;
     applied=true;
   }
   if(Array.isArray(data.tasks)){
@@ -678,26 +687,32 @@ function bindReferralFromStart(){
   if(!s.referredBy){
     s.referredBy=inviter;
     s.referrals=(Number(s.referrals)||0)+1;
-    const pct=getReferralConfig().percent;
-    logEvent(`Реферал привязан к ID ${inviter} (ставка ${pct}%)`);
+    const rCfg=getReferralConfig();
+    const joinStars=Math.max(0,Number(rCfg.rewardStars)||0);
+    if(joinStars>0){
+      s.refStarsEarned=(Number(s.refStarsEarned)||0)+joinStars;
+    }
+    logEvent(`Реферал привязан к ID ${inviter}: ставка с трат ${rCfg.starsPercent}%`);
     save();
     apiCall("/api/referrals/bind",{method:"POST",body:JSON.stringify({inviter})}).catch(()=>{});
   }
 }
 
-function rewardCoinGain(amount){
-  const base=Math.max(0,Number(amount)||0);
-  if(!base)return 0;
-  s.balance+=base;
-  const pct=getReferralConfig().percent;
+function recordStarsSpentAndReferral(amountStars){
+  const spent=Math.max(0,Number(amountStars)||0);
+  if(spent<=0)return;
+  s.starsSpent=(Number(s.starsSpent)||0)+spent;
+  const rCfg=getReferralConfig();
+  const pct=Math.max(0,Number(rCfg.starsPercent)||0);
   if(pct>0&&(s.referredBy||(Number(s.referrals)||0)>0)){
-    const bonus=Math.floor(base*pct/100);
-    if(bonus>0){
-      s.refEarned=(Number(s.refEarned)||0)+bonus;
-      logEvent(`Реф-бонус ${pct}% с награды: +${fmt(bonus)} MIRCOIN`);
-    }
+    const refBonusStars=Math.max(1,Math.round(spent*pct/100));
+    s.refStarsEarned=(Number(s.refStarsEarned)||0)+refBonusStars;
+    logEvent(`Реф-награда за трату ${spent} ⭐ (${pct}%): +${refBonusStars} ⭐`);
   }
-  return base;
+  apiCall("/api/referrals/stars-spend",{
+    method:"POST",
+    body:JSON.stringify({spentStars:spent,percent:pct,inviter:s.referredBy||""})
+  }).catch(()=>{});
 }
 
 function initTelegram(){
@@ -788,7 +803,7 @@ function syncRocketBonuses(){
 function fmt(n){return Math.floor(Number(n)||0).toLocaleString("ru-RU")}
 function esc(x){return String(x!=null?x:"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function conf(){return s.config||defaults}
-function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200)}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2500)}
 function sound(freq=520){
   if(muted)return;
   try{
@@ -809,9 +824,28 @@ function busy(id){return Object.values(s.flights).some(f=>f.rocket===id&&f.endAt
 function freeRocket(){return s.rockets.find(r=>r.owned&&!busy(r.id))}
 function occupiedFor(id){if(Object.values(s.flights).some(f=>f.rocket===id&&f.endAt>now))return"полет";if(s.race&&s.race.rocket===id&&s.race.status==="running")return"гонка";return""}
 function slotsCap(){return s.slots.length}
-function starsPayLocal(amount){amount=Math.max(0,Number(amount)||0);if(s.stars<amount)return false;s.stars-=amount;s.starsSpent+=amount;return true}
 
 let payInFlight=false;
+async function createRealStarsInvoice(amount,meta){
+  const body=Object.assign({amountStars:amount,stars:amount,currency:"XTR"},meta||{});
+  for(const url of ["/api/stars/invoice","/stars/invoice"]){
+    try{
+      const res=await apiCall(url,{method:"POST",body:JSON.stringify(body)});
+      if(res.status===404)continue;
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){
+        toast(data&&data.error?String(data.error):"Ошибка создания счёта Stars");
+        return null;
+      }
+      const invoiceUrl=data.invoiceUrl||data.invoice_url||data.invoiceLink||data.url||"";
+      const orderId=data.orderId||data.order_id||data.id||"";
+      if(invoiceUrl)return {invoiceUrl,orderId};
+    }catch(_){}
+  }
+  toast("Не удалось получить счёт Stars с сервера");
+  return null;
+}
+
 async function starsPayReal(amount,meta){
   amount=Math.max(0,Number(amount)||0);
   if(amount<=0)return true;
@@ -819,39 +853,27 @@ async function starsPayReal(amount,meta){
   payInFlight=true;
   try{
     const webApp=window.Telegram&&window.Telegram.WebApp;
-    if(!webApp||typeof webApp.openInvoice!=="function"){
-      return starsPayLocal(amount);
-    }
-    try{
-      const res=await apiCall("/stars/invoice",{
-        method:"POST",
-        body:JSON.stringify(Object.assign({amountStars:amount,currency:"XTR"},meta||{}))
-      });
-      if(!res.ok){
-        return starsPayLocal(amount);
-      }
-      const data=await res.json().catch(()=>({}));
-      const invoiceUrl=data.invoiceUrl||data.url||"";
-      const orderId=data.orderId||data.id||"";
-      if(!invoiceUrl){
-        return starsPayLocal(amount);
-      }
-      const status=await new Promise(resolve=>{
-        try{webApp.openInvoice(invoiceUrl,st=>resolve(String(st||"")))}
-        catch(_){resolve("error")}
-      });
-      if(status==="paid"){
-        if(orderId){
-          await apiCall("/stars/order/"+encodeURIComponent(String(orderId)),{method:"GET"}).catch(()=>{});
-        }
-        s.starsSpent+=amount;
-        save();
-        return true;
-      }
+    if(!webApp||typeof webApp.openInvoice!=="function"||!isInsideTelegramApp()){
+      toast("Открой игру внутри Telegram для оплаты Stars");
       return false;
-    }catch(_){
-      return starsPayLocal(amount);
     }
+    const invoice=await createRealStarsInvoice(amount,meta);
+    if(!invoice||!invoice.invoiceUrl)return false;
+    const status=await new Promise(resolve=>{
+      try{webApp.openInvoice(invoice.invoiceUrl,st=>resolve(String(st||"")))}
+      catch(_){resolve("error")}
+    });
+    if(status==="paid"){
+      if(invoice.orderId){
+        await apiCall("/api/stars/order/"+encodeURIComponent(String(invoice.orderId)),{method:"GET"}).catch(()=>{});
+      }
+      recordStarsSpentAndReferral(amount);
+      save();
+      return true;
+    }
+    if(status==="cancelled")toast("Оплата Stars отменена");
+    else toast("Оплата Stars не завершена");
+    return false;
   }finally{
     payInFlight=false;
   }
@@ -885,7 +907,7 @@ function settle(){
   for(const [id,f] of Object.entries(s.flights)){
     if(!f.claimed&&f.endAt<=now){
       f.claimed=true;
-      rewardCoinGain(reward);
+      s.balance+=reward;
       logEvent(`${getRocket(f.rocket).name} вернулась: +${fmt(reward)} MIRCOIN`);
       changed=true;
     }
@@ -913,7 +935,7 @@ function finishRace(){
     3:(Number(econ.racePrize3Pct)||0)/100
   };
   const prize=Math.floor(r.pot*(shares[r.place]||0));
-  if(prize){rewardCoinGain(prize);logEvent(`Космическая гонка: место ${r.place}, награда ${fmt(prize)} MIRCOIN`)}
+  if(prize){s.balance+=prize;logEvent(`Космическая гонка: место ${r.place}, награда ${fmt(prize)} MIRCOIN`)}
   else logEvent(`Космическая гонка завершена: место ${r.place}`);
   toast(r.place<=3?`Финиш! ${r.place} место — +${fmt(prize)} MIRCOIN`:`Финиш! Место ${r.place}`);
   sound(r.place<=3?800:300);save();render();
@@ -927,7 +949,7 @@ async function startRace(id,pay){
   const entryStars=Math.max(0,Number(econ.raceEntryStars)||0);
   const paid=pay==="coins"
     ?coinPay(entryCoins)
-    :await starsPayReal(entryStars,{purchaseType:"race_entry",itemId:String(id)});
+    :await starsPayReal(entryStars,{purchaseType:"race_entry",itemId:String(id),title:"Вход в космическую гонку"});
   if(!paid)return toast(pay==="coins"?`Не хватает ${fmt(entryCoins)} MIRCOIN`:"Оплата Stars не выполнена");
   const bots=Array.from({length:9},(_,i)=>({name:["Луна-7","КосмоКот","Звёздный Лис","Орбита","Искра","Комета","Нова","Пульсар","Спутник"][i],progress:0,pace:.0125+Math.random()*.004}));
   s.race={status:"running",rocket:id,startAt:now,endsAt:now+60000,pot:Math.max(0,Number(econ.raceBasePotCoins)||0),userProgress:0,bots,boosts:0};
@@ -942,7 +964,7 @@ async function raceBoost(id,pay){
   const cost=mode==="coins"?Math.max(0,Number(b.coins)||0):Math.max(0,Number(b.stars)||0);
   const ok=mode==="coins"
     ?coinPay(cost)
-    :await starsPayReal(cost,{purchaseType:"race_boost",itemId:String(b.id)});
+    :await starsPayReal(cost,{purchaseType:"race_boost",itemId:String(b.id),title:b.name});
   if(!ok)return toast(mode==="coins"?"Не хватает MIRCOIN":"Оплата Stars не выполнена");
   const potAdd=Math.max(0,Number(getEconomy().raceBoostPotAddCoins)||0);
   s.race.userProgress+=b.pct/100;
@@ -959,7 +981,7 @@ async function accelerate(fid,id,pay){
   const cost=mode==="coins"?Math.max(0,Number(b.coins)||0):Math.max(0,Number(b.stars)||0);
   const ok=mode==="coins"
     ?coinPay(cost)
-    :await starsPayReal(cost,{purchaseType:"flight_boost",itemId:String(b.id),flightId:String(fid)});
+    :await starsPayReal(cost,{purchaseType:"flight_boost",itemId:String(b.id),flightId:String(fid),title:b.name});
   if(!ok)return toast(mode==="coins"?"Не хватает MIRCOIN":"Оплата Stars не выполнена");
   f.endAt=now+Math.max(60000,flightRemaining(f)/b.mult);
   logEvent(`${b.name}: ускорение полёта`);
@@ -972,7 +994,7 @@ async function buySlot(index,pay){
   const cPrice=Math.max(0,Number(p.coins)||0);
   const sPrice=Math.max(0,Number(p.stars)||0);
   const ok=pay==="stars"
-    ?await starsPayReal(sPrice,{purchaseType:"slot",itemId:slotId})
+    ?await starsPayReal(sPrice,{purchaseType:"slot",itemId:slotId,title:"Слот ангара №"+(index+2)})
     :coinPay(cPrice);
   if(!ok)return toast(pay==="stars"?"Оплата Stars не выполнена":"Не хватает MIRCOIN");
   s.slots.push({rocket:null});
@@ -987,7 +1009,7 @@ async function buyRocket(id,pay){
   const cPrice=Math.max(0,Number(r.coins)||0);
   const sPrice=Math.max(0,Number(r.stars)||0);
   const ok=pay==="stars"
-    ?await starsPayReal(sPrice,{purchaseType:"rocket",itemId:String(r.id)})
+    ?await starsPayReal(sPrice,{purchaseType:"rocket",itemId:String(r.id),title:r.name})
     :coinPay(cPrice);
   if(!ok)return toast(pay==="stars"?"Оплата Stars не выполнена":"Не хватает MIRCOIN");
   addRocket(id);
@@ -1001,7 +1023,7 @@ async function buySkin(id,pay){
   const priceCoins=Math.max(0,Number(sk.coins!=null?sk.coins:sk.price)||0);
   const priceStars=Math.max(0,Number(sk.stars)||0);
   const ok=mode==="stars"
-    ?await starsPayReal(priceStars,{purchaseType:"skin",itemId:String(sk.id)})
+    ?await starsPayReal(priceStars,{purchaseType:"skin",itemId:String(sk.id),title:"Облик "+sk.name})
     :coinPay(priceCoins);
   if(!ok)return toast(mode==="stars"?"Оплата Stars не выполнена":"Не хватает MIRCOIN");
   s.skinsOwned.push(id);
@@ -1048,7 +1070,7 @@ function claimTask(id){
   }
   t.done=true;
   const reward=Math.max(0,Number(t.reward)||0);
-  rewardCoinGain(reward);
+  s.balance+=reward;
   logEvent(`Задание "${t.name}" выполнено: +${fmt(reward)} MIRCOIN`);
   sound(780);save();
   apiCall(`/api/tasks/${encodeURIComponent(id)}/claim`,{method:"POST",body:JSON.stringify({taskId:id})}).catch(()=>{});
@@ -1061,7 +1083,7 @@ function checkDaily(){
   if(s.lastDay===day)return toast("Бонус уже получен сегодня");
   const bonus=Math.max(0,Number(getEconomy().dailyBonusCoins)||0);
   s.lastDay=day;
-  rewardCoinGain(bonus);
+  s.balance+=bonus;
   logEvent(`Ежедневный бонус: +${fmt(bonus)} MIRCOIN`);
   save();
   toast(`+${fmt(bonus)} MIRCOIN за вход`);
@@ -1070,12 +1092,12 @@ function checkDaily(){
 
 function claimReferral(){
   const rCfg=getReferralConfig();
-  const reward=Math.max(0,Number(rCfg.rewardCoins)||0);
+  const rewardStars=Math.max(0,Number(rCfg.rewardStars)||0);
   s.referrals++;
-  rewardCoinGain(reward);
-  logEvent(`Приглашён друг (ставка ${rCfg.percent}%): +${fmt(reward)} MIRCOIN`);
+  s.refStarsEarned=(Number(s.refStarsEarned)||0)+rewardStars;
+  logEvent(`Приглашён друг: +${fmt(rewardStars)} ⭐ · ставка с трат ${rCfg.starsPercent}%`);
   save();
-  toast(`Приглашение засчитано: +${fmt(reward)} MIRCOIN`);
+  toast(`Приглашение засчитано: +${fmt(rewardStars)} ⭐ (и ${rCfg.starsPercent}% с трат Stars)`);
   render();
 }
 
@@ -1125,7 +1147,7 @@ function hero(){
 function rocketEmoji(){return "🚀"}
 
 function summary(){
-  return `<div class="stats"><div class="stat"><strong>${fmt(s.balance)} 🪙</strong><small>баланс MIRCOIN</small></div><div class="stat"><strong>${fmt(s.stars)} ⭐</strong><small>баланс Stars</small></div><div class="stat"><strong>${s.slots.length} / ${s.rockets.length}</strong><small>слоты / ракеты</small></div></div>`;
+  return `<div class="stats"><div class="stat"><strong>${fmt(s.balance)} 🪙</strong><small>баланс MIRCOIN</small></div><div class="stat"><strong>${fmt(s.starsSpent)} ⭐</strong><small>потрачено Stars</small></div><div class="stat"><strong>${s.slots.length} / ${s.rockets.length}</strong><small>слоты / ракеты</small></div></div>`;
 }
 
 function slotCards(){
@@ -1183,7 +1205,7 @@ function renderFlight(){
   const active=Object.entries(s.flights).filter(([_,f])=>!f.claimed);
   const econ=getEconomy();
   const reward=Math.max(0,Number(econ.flightRewardCoins)||0);
-  return `${hero()}<div class="sectionHead"><div><h2>Базовый полёт</h2><p>Отправь свободную ракету и получи награду по возвращении</p></div><span class="pill">+${fmt(reward)} 🪙</span></div><div class="card cardPad"><div class="grid2">${conf().rockets.map(r=>`<div class="stat"><strong>${durationText(flightDuration(r.id))}</strong><small>${esc(r.name)}</small></div>`).join("")}</div><p class="tiny muted" style="line-height:1.5;margin:12px 0 0">Скорость ракеты уменьшает длительность миссии. Ускорители сокращают оставшееся время (за MIRCOIN или Stars).</p></div><div class="sectionHead"><div><h2>Свободные ракеты</h2><p>Ракета будет занята до завершения таймера</p></div></div>${s.rockets.filter(r=>r.owned).map(r=>{
+  return `${hero()}<div class="sectionHead"><div><h2>Базовый полёт</h2><p>Отправь свободную ракету и получи награду по возвращении</p></div><span class="pill">+${fmt(reward)} 🪙</span></div><div class="card cardPad"><div class="grid2">${conf().rockets.map(r=>`<div class="stat"><strong>${durationText(flightDuration(r.id))}</strong><small>${esc(r.name)}</small></div>`).join("")}</div><p class="tiny muted" style="line-height:1.5;margin:12px 0 0">Скорость ракеты уменьшает длительность миссии. Ускорители сокращают оставшееся время (за MIRCOIN или реальные Stars).</p></div><div class="sectionHead"><div><h2>Свободные ракеты</h2><p>Ракета будет занята до завершения таймера</p></div></div>${s.rockets.filter(r=>r.owned).map(r=>{
     const rocket=getRocket(r.id),isBusy=busy(r.id),flight=active.find(([_,f])=>f.rocket===r.id);
     let boostButtons="";
     if(flight){
@@ -1204,7 +1226,7 @@ function renderRace(){
     const me=Math.min(100,Math.max(0,r.userProgress*100));
     const sorted=[{name:"Ты",progress:r.userProgress,me:true},...r.bots.map(b=>({name:b.name,progress:b.progress}))].sort((a,b)=>b.progress-a.progress);
     const boostAdd=Math.max(0,Number(econ.raceBoostPotAddCoins)||0);
-    return `<div class="sectionHead"><div><h2>Космическая гонка</h2><p>10 пилотов · финишируй в тройке лидеров</p></div><span class="pill">⏱ <span data-race-timer>${durationText(left)}</span></span></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>${fmt(r.pot)} 🪙</strong><small>призовой банк</small></div><div class="stat"><strong>10</strong><small>пилотов на трассе</small></div><div class="stat"><strong>${r.boosts}</strong><small>твоих бустов</small></div></div><div class="raceTrack">${[{name:"Ты",progress:r.userProgress,me:true},...r.bots.map((b,i)=>({name:b.name,progress:b.progress,index:i}))].map(x=>`<div class="raceLane"><span class="raceLaneName">${esc(x.name)}</span><div class="raceLaneTrack"><span class="raceShip ${x.me?"raceMe":""}" data-racer="${x.me?"me":x.index}" aria-label="${esc(x.name)}: ${Math.floor(x.progress*100)}%" style="left:calc(${Math.min(90,Math.max(0,x.progress*100))}% - 5px)">🚀</span><span class="raceFinish" aria-hidden="true"></span></div></div>`).join("")}</div><div class="progress"><i style="width:${me}%"></i></div><p class="tiny muted">Твой прогресс: ${Math.floor(me)}% · банк растёт на ${fmt(boostAdd)} за каждый использованный бустер</p><div class="raceRanks">${sorted.slice(0,5).map((x,i)=>`<span class="rankDot ${x.me?"me":""}">${i+1}. ${esc(x.name)}</span>`).join("")}</div></div><div class="sectionHead"><div><h2>Бустеры гонки</h2><p>Покупка за MIRCOIN или Stars добавляет путь и банк</p></div></div><div class="raceBoostList">${conf().raceBoosts.map(b=>{
+    return `<div class="sectionHead"><div><h2>Космическая гонка</h2><p>10 пилотов · финишируй в тройке лидеров</p></div><span class="pill">⏱ <span data-race-timer>${durationText(left)}</span></span></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>${fmt(r.pot)} 🪙</strong><small>призовой банк</small></div><div class="stat"><strong>10</strong><small>пилотов на трассе</small></div><div class="stat"><strong>${r.boosts}</strong><small>твоих бустов</small></div></div><div class="raceTrack">${[{name:"Ты",progress:r.userProgress,me:true},...r.bots.map((b,i)=>({name:b.name,progress:b.progress,index:i}))].map(x=>`<div class="raceLane"><span class="raceLaneName">${esc(x.name)}</span><div class="raceLaneTrack"><span class="raceShip ${x.me?"raceMe":""}" data-racer="${x.me?"me":x.index}" aria-label="${esc(x.name)}: ${Math.floor(x.progress*100)}%" style="left:calc(${Math.min(90,Math.max(0,x.progress*100))}% - 5px)">🚀</span><span class="raceFinish" aria-hidden="true"></span></div></div>`).join("")}</div><div class="progress"><i style="width:${me}%"></i></div><p class="tiny muted">Твой прогресс: ${Math.floor(me)}% · банк растёт на ${fmt(boostAdd)} за каждый использованный бустер</p><div class="raceRanks">${sorted.slice(0,5).map((x,i)=>`<span class="rankDot ${x.me?"me":""}">${i+1}. ${esc(x.name)}</span>`).join("")}</div></div><div class="sectionHead"><div><h2>Бустеры гонки</h2><p>Покупка за MIRCOIN или реальные Stars добавляет путь и банк</p></div></div><div class="raceBoostList">${conf().raceBoosts.map(b=>{
       const cCost=Math.max(0,Number(b.coins)||0), sCost=Math.max(0,Number(b.stars)||0);
       return `<div class="raceBoostCard"><div><strong>⚡ ${esc(b.name)}</strong><small class="muted">+${b.pct}% к дистанции</small></div><div class="raceBoostBtns"><button class="btn smallBtn" data-act="raceBoost" data-id="${b.id}" data-pay="coins">${fmt(cCost)} 🪙</button><button class="btn smallBtn" data-act="raceBoost" data-id="${b.id}" data-pay="stars">${fmt(sCost)} ⭐</button></div></div>`;
     }).join("")}</div><div style="margin-top:10px"><button class="btn ghost full" data-act="pauseRace">Ⅱ Пауза интерфейса</button></div>`;
@@ -1229,7 +1251,7 @@ function renderTasks(){
     const linkBtn=t.url?`<button class="btn smallBtn ghost" data-act="visitTask" data-id="${esc(t.id)}">🔗 Перейти</button>`:"";
     const claimBtn=`<button class="btn smallBtn ${t.done?"ghost":"primary"}" data-act="task" data-id="${esc(t.id)}" ${t.done?"disabled":""}>${t.done?"Готово":"Забрать"}</button>`;
     return `<div class="task"><div class="taskIcon">${esc(t.icon||(isSponsor?"🤝":"⭐"))}</div><div class="taskBody"><strong><span>${esc(t.name)}</span><span class="taskTag ${isSponsor?"sponsor":"own"}">${typeLabel}</span></strong><small>${esc(t.desc||"Выполни задание")} · +${fmt(t.reward)} MIRCOIN</small></div><div class="taskActions">${linkBtn}${claimBtn}</div></div>`;
-  }).join("")||`<div class="empty">Активных заданий пока нет</div>`}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Реферальная программа</h2><p>+${fmt(rCfg.rewardCoins)} 🪙 за приглашение · ${rCfg.percent}% от наград · начислено ${fmt(s.refEarned)} 🪙</p></div><span class="pill">${s.referrals} реф. · ${rCfg.percent}%</span></div><div class="tiny muted" style="margin-bottom:8px;word-break:break-all">${esc(buildReferralLink())}${s.referredBy?` · пригласил ID ${esc(s.referredBy)}`:""}</div><div class="slotActions"><button class="btn smallBtn" data-act="copyRef">🔗 Скопировать реф-ссылку</button><button class="btn smallBtn gold" data-act="refDemo">+${fmt(rCfg.rewardCoins)} 🪙 · приглашение</button></div></div>`;
+  }).join("")||`<div class="empty">Активных заданий пока нет</div>`}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Реферальная программа</h2><p>+${fmt(rCfg.rewardStars)} ⭐ за приглашение · ${rCfg.starsPercent}% с потраченных Stars · начислено ${fmt(s.refStarsEarned)} ⭐</p></div><span class="pill">${s.referrals} реф. · ${rCfg.starsPercent}% ⭐</span></div><div class="tiny muted" style="margin-bottom:8px;word-break:break-all">${esc(buildReferralLink())}${s.referredBy?` · пригласил ID ${esc(s.referredBy)}`:""}</div><div class="slotActions"><button class="btn smallBtn" data-act="copyRef">🔗 Скопировать реф-ссылку</button><button class="btn smallBtn gold" data-act="refDemo">+${fmt(rCfg.rewardStars)} ⭐ · приглашение</button></div></div>`;
 }
 
 function renderAirdrop(){
@@ -1240,7 +1262,7 @@ function settingsView(){
   const tgId=getTelegramUserId();
   const canAdmin=isAuthorizedAdmin();
   const resetConfirming=now<confirmResetUntil;
-  return `<div class="sectionHead"><div><h2>Настройки</h2><p>Профиль и параметры игры</p></div><span class="pill">⚙️</span></div><div class="card cardPad"><div class="settingsRow"><span>Твой ID</span><strong>${esc(tgId||s.userId)}</strong></div><div class="settingsRow"><span>Баланс Stars</span><strong>${fmt(s.stars)} ⭐</strong></div><div class="settingsRow"><span>Звуковые эффекты</span><button class="btn smallBtn" data-act="mute">${muted?"🔇 Выключены":"🔊 Включены"}</button></div><div class="settingsRow"><span>Локальные данные</span><button class="btn smallBtn danger" data-act="reset">${resetConfirming?"Точно сбросить?":"Сбросить прогресс"}</button></div></div>${canAdmin?`<div class="card cardPad"><div class="sectionHead"><div><h2>Инструменты администратора</h2><p>Доступ только для ID ${esc(OWNER_ID)}</p></div></div><button class="btn primary full" data-act="testAdmin">${s.admin?"Закрыть панель администратора":"Открыть панель администратора"}</button></div>`:""}`;
+  return `<div class="sectionHead"><div><h2>Настройки</h2><p>Профиль и параметры игры</p></div><span class="pill">⚙️</span></div><div class="card cardPad"><div class="settingsRow"><span>Твой ID</span><strong>${esc(tgId||s.userId)}</strong></div><div class="settingsRow"><span>Потрачено Stars</span><strong>${fmt(s.starsSpent)} ⭐</strong></div><div class="settingsRow"><span>Звуковые эффекты</span><button class="btn smallBtn" data-act="mute">${muted?"🔇 Выключены":"🔊 Включены"}</button></div><div class="settingsRow"><span>Локальные данные</span><button class="btn smallBtn danger" data-act="reset">${resetConfirming?"Точно сбросить?":"Сбросить прогресс"}</button></div></div>${canAdmin?`<div class="card cardPad"><div class="sectionHead"><div><h2>Инструменты администратора</h2><p>Доступ только для ID ${esc(OWNER_ID)}</p></div></div><button class="btn primary full" data-act="testAdmin">${s.admin?"Закрыть панель администратора":"Открыть панель администратора"}</button></div>`:""}`;
 }
 
 function adminView(){
@@ -1279,23 +1301,23 @@ function adminView(){
   </div>
 
   <div class="card cardPad">
-    <div class="sectionHead"><div><h2>Реферальная система</h2><p>Ссылка, награда за приглашение и процент с наград</p></div><span class="pill">${rCfg.percent}% · +${fmt(rCfg.rewardCoins)} 🪙</span></div>
+    <div class="sectionHead"><div><h2>Реферальная система (в Stars)</h2><p>Награда за приглашение в Stars и % с потраченных рефералом Stars</p></div><span class="pill">${rCfg.starsPercent}% · +${fmt(rCfg.rewardStars)} ⭐</span></div>
     <label class="field">Базовый URL бота / Mini App (сюда подставится ?startapp=ref_ID или {code})<input id="refBaseUrlInput" type="url" value="${esc(rCfg.baseUrl)}" placeholder="https://t.me/your_bot/app"></label>
     <div class="adminGrid">
-      <label class="field">Награда за приглашение (MIRCOIN)<input id="refRewardInput" type="number" min="0" step="1" value="${rCfg.rewardCoins}"></label>
-      <label class="field">Процент от наград (0–100%)<input id="refPercentInput" type="number" min="0" max="100" step="1" value="${rCfg.percent}"></label>
+      <label class="field">Награда за приглашение (Stars)<input id="refRewardStarsInput" type="number" min="0" step="1" value="${rCfg.rewardStars}"></label>
+      <label class="field">% с потраченных Stars (0–100%)<input id="refStarsPercentInput" type="number" min="0" max="100" step="1" value="${rCfg.starsPercent}"></label>
     </div>
     <div class="tiny muted" style="margin:4px 0 8px;word-break:break-all">Пример ссылки: ${esc(buildReferralLink(OWNER_ID))}</div>
     <div class="slotActions">
       <button class="btn smallBtn primary" data-act="saveRefSettings">Сохранить рефералку</button>
       <button class="btn smallBtn" data-act="copyRef">Скопировать ссылку</button>
     </div>
-    <div class="stats" style="margin-top:10px;grid-template-columns:repeat(2,minmax(0,1fr))"><div class="stat"><strong>${fmt(s.referrals)}</strong><small>рефералов</small></div><div class="stat"><strong>${fmt(s.refEarned)} 🪙</strong><small>начислено по рефке</small></div></div>
+    <div class="stats" style="margin-top:10px;grid-template-columns:repeat(2,minmax(0,1fr))"><div class="stat"><strong>${fmt(s.referrals)}</strong><small>рефералов</small></div><div class="stat"><strong>${fmt(s.refStarsEarned)} ⭐</strong><small>начислено по рефке</small></div></div>
   </div>
 
   <div class="card cardPad">
     <div class="stats"><div class="stat"><strong>1</strong><small>игроков локально</small></div><div class="stat"><strong>1</strong><small>сейчас онлайн</small></div><div class="stat"><strong>${fmt(s.balance)}</strong><small>MIRCOIN в игре</small></div></div>
-    <div class="stats" style="margin-top:8px"><div class="stat"><strong>${fmt(s.starsSpent)}</strong><small>Stars потрачено</small></div><div class="stat"><strong>${fmt(s.stars)}</strong><small>остаток Stars</small></div><div class="stat"><strong>${events.length}</strong><small>событий</small></div></div>
+    <div class="stats" style="margin-top:8px"><div class="stat"><strong>${fmt(s.starsSpent)}</strong><small>Stars потрачено</small></div><div class="stat"><strong>${fmt(s.refStarsEarned)}</strong><small>Stars по рефке</small></div><div class="stat"><strong>${events.length}</strong><small>событий</small></div></div>
   </div>
 
   <div class="card cardPad">
@@ -1349,7 +1371,7 @@ function adminView(){
 
   <div class="card cardPad">
     <div class="sectionHead"><div><h2>Управление ресурсами</h2><p>Начисление баланса и завершение таймеров</p></div></div>
-    <div class="slotActions"><button class="btn smallBtn" data-act="grant">＋1 000 MIRCOIN / 100 Stars</button><button class="btn smallBtn gold" data-act="finishFlights">Завершить полёты</button></div>
+    <div class="slotActions"><button class="btn smallBtn" data-act="grant">＋1 000 MIRCOIN / ＋10 ⭐ реф</button><button class="btn smallBtn gold" data-act="finishFlights">Завершить полёты</button></div>
   </div>`;
 }
 
@@ -1473,7 +1495,6 @@ document.addEventListener("click",e=>{
   }
   if(a==="pauseRace"){toast("Пауза — только интерфейс; таймер гонки продолжается");return}
 
-  // Strictly Admin-only actions (OWNER_ID = 8631686158)
   if(!isAuthorizedAdmin()){
     s.admin=false;
     return toast("Доступ только для администратора");
@@ -1497,19 +1518,20 @@ document.addEventListener("click",e=>{
   }
   if(a==="saveRefSettings"){
     const urlInp=document.getElementById("refBaseUrlInput");
-    const rewInp=document.getElementById("refRewardInput");
-    const pctInp=document.getElementById("refPercentInput");
+    const rewInp=document.getElementById("refRewardStarsInput");
+    const pctInp=document.getElementById("refStarsPercentInput");
     const baseUrl=safeUrl(urlInp&&urlInp.value)||defaults.referral.baseUrl;
-    const rewardCoins=Math.max(0,Number(rewInp&&rewInp.value)||0);
-    const percent=Math.min(100,Math.max(0,Number(pctInp&&pctInp.value)||0));
-    s.config.referral={baseUrl,rewardCoins,percent};
-    s.refPercent=percent;
-    logEvent(`Обновлены реф-настройки: +${fmt(rewardCoins)} 🪙, ${percent}%`);
+    const rewardStars=Math.max(0,Number(rewInp&&rewInp.value)||0);
+    const starsPercent=Math.min(100,Math.max(0,Number(pctInp&&pctInp.value)||0));
+    s.config.referral={baseUrl,rewardStars,starsPercent};
+    s.refStarsPercent=starsPercent;
+    logEvent(`Обновлены реф-настройки: +${fmt(rewardStars)} ⭐, ${starsPercent}% с трат Stars`);
     syncConfigToServer("referral",true);
     return render();
   }
   if(a==="grant"){
-    s.balance+=1000;s.stars+=100;
+    s.balance+=1000;
+    s.refStarsEarned=(Number(s.refStarsEarned)||0)+10;
     logEvent("Админ: начислены ресурсы");
     save();toast("Ресурсы начислены");render();return;
   }
@@ -1562,16 +1584,16 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{
   const el=e.target;
   if(!el)return;
-  if(el.id==="refPercentInput"||el.id==="refRewardInput"||el.id==="refBaseUrlInput"){
+  if(el.id==="refStarsPercentInput"||el.id==="refRewardStarsInput"||el.id==="refBaseUrlInput"){
     if(!isAuthorizedAdmin())return;
     const urlInp=document.getElementById("refBaseUrlInput");
-    const rewInp=document.getElementById("refRewardInput");
-    const pctInp=document.getElementById("refPercentInput");
+    const rewInp=document.getElementById("refRewardStarsInput");
+    const pctInp=document.getElementById("refStarsPercentInput");
     const baseUrl=safeUrl(urlInp&&urlInp.value)||getReferralConfig().baseUrl;
-    const rewardCoins=Math.max(0,Number(rewInp&&rewInp.value)||0);
-    const percent=Math.min(100,Math.max(0,Number(pctInp&&pctInp.value)||0));
-    s.config.referral={baseUrl,rewardCoins,percent};
-    s.refPercent=percent;
+    const rewardStars=Math.max(0,Number(rewInp&&rewInp.value)||0);
+    const starsPercent=Math.min(100,Math.max(0,Number(pctInp&&pctInp.value)||0));
+    s.config.referral={baseUrl,rewardStars,starsPercent};
+    s.refStarsPercent=starsPercent;
     syncConfigToServer("referral",false);
     toast("Реф-настройки сохранены");
     return;
