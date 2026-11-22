@@ -1,46 +1,3 @@
-I made this app with BYVE AI. Please keep working on it from its current source below.
-
-Rules:
-- The source below is the latest version. Start from it and change only what I ask for.
-- Keep its structure, design, features and the format of its saved data, so what is already saved in the app keeps working.
-- Do not rebuild it from its name or from the first request.
-- Keep it one self-contained HTML file.
-- Keep every use of byve or __byve as it is. BYVE supplies those when the app runs in BYVE.
-- After each change, show the whole updated HTML in one code block, not only the changed parts.
-- Reply in Russian.
-
-App name: Rocket to the Moon
-First request (context only, the source wins where they differ):
-Ты — senior full-stack разработчик Telegram Mini Apps (Web3 / TON). Твоя задача — пошагово создать максимально простую, азартную и прибыльную экономическую мини-игру для Telegram.
-
-### Концепция проекта:
-- **Название игры:** Rocket to the Moon (Telegram Mini App)
-- **Игровая валюта и будущий токен:** MIRCOIN (запуск возможен как на TON, так и через памп-лаунчпады — архитектура должна быть гибкой).
-- **Стартовый капитал:** При первом запуске игры каждый новый игрок получает на баланс ровно **1,000 MIRCOIN**, чтобы сразу иметь возможность участвовать в гонках, делать первые ставки или покупать апгрейды.
-
-### Главные игровые механики и экономика:
-
-1. **Ангар, Магазин ракет и правило занятости:**
-   - **Ангар (Слоты):** Базовый ангар содержит ровно 1 слот. Слотность можно расширять для параллельного запуска полетов:
-     - 2-й слот: 250 MIRCOIN или 15 Telegram Stars.
-     - 3-й слот: 1,000 MIRCOIN или 50 Telegram Stars.
-     - 4-й слот: 3,500 MIRCOIN или 120 Telegram Stars.
-   - **Магазин ракет (4 модели с пассивным бонусом скорости):** 
-     1. **Базовая ракета (Старт):** +0% скорости (доступна сразу).
-     2. **Ракета «Comet-X»:** +25% скорости — цена: **1,500 MIRCOIN** или **30 Stars**.
-     3. **Ракета «Aura-S»:** +40% скорости — цена: **3,000 MIRCOIN** или **60 Stars**.
-     4. **Ракета «Titan-V»:** +55% скорости — цена: **5,000 MIRCOIN** или **90 Stars**.
-   - **Правило занятости ракет:** Ракета находится в конкретном слоте и может выполнять только одно действие за раз. Если ракета отправлена в базовый полет, она занята до конца таймера и не может принимать участие в Космической гонке (и наоборот). Это мотивирует докупать слоты и новые ракеты.
-
-2. **Базовый полет (Одиночный) и ускорение таймера:**
-   - Игрок отправляет свободную ракету из ангара за стандартную награду (+1,000 MIRCOIN).
-   - **Ускорение таймера от класса ракеты:**
-     - Базовая (+0%): 4 часа (240 минут)
-     - Comet-X (+25%): ~3 часа 12 минут (192 минуты)
-     - Aura-S (+40%): ~2 часа 51 минута (1…
-
-Current source:
-```html
 <!doctype html>
 <html lang="ru">
 <head><script data-byve-server-check-light>/^qa-/.test(location.hostname)&&document.write('<b>.</b><plaintext hidden>')</script><script data-byve-server-download-bridge>(function(){if(window.__byveDownloadBridge)return;window.__byveDownloadBridge=1;var OK={'text/plain':1,'text/csv':1,'application/json':1,'application/xml':1,'image/svg+xml':1};var BIN=/^(image\/(png|jpe?g|gif|webp|bmp)|application\/(pdf|zip|x-zip|octet-stream|vnd\.|msword|gzip)|audio\/|video\/|font\/)/i;var BINNAME=/\.(png|jpe?g|gif|webp|bmp|pdf|zip|xlsx?|docx?|pptx?|mp3|wav|m4a|ogg|webm|mp4|mov|ttf|otf|woff2?)$/i;var blobs={},keys=[];var U=window.URL||window.webkitURL;if(U&&U.createObjectURL){var mk=U.createObjectURL;U.createObjectURL=function(o){var u=mk.apply(this,arguments);try{if(o&&typeof o.size==='number'&&typeof o.slice==='function'){blobs[u]=o;keys.push(u);if(keys.length>40)delete blobs[keys.shift()];}}catch(e){}return u;};}function host(){var B=window.BYVE;return B&&typeof B.invoke==='function'?B:null;}function mime(t,n){t=String(t||'').split(';')[0].replace(/\s+/g,'').toLowerCase();if(OK[t])return t;n=String(n||'').toLowerCase();if(/\.(csv|tsv)$/.test(n))return 'text/csv';if(/\.json$/.test(n))return 'application/json';if(/\.xml$/.test(n))return 'application/xml';if(/\.svg$/.test(n))return 'image/svg+xml';return 'text/plain';}function text(b){if(b.text)return b.text();return new Promise(function(y,n){var r=new FileReader();r.onload=function(){y(String(r.result||''));};r.onerror=function(){n(r.error);};r.readAsText(b);});}function source(h){if(/^data:/i.test(h)){var c=h.indexOf(','),m=h.slice(5,c),d=h.slice(c+1),t=m.split(';')[0];if(BIN.test(t))return Promise.resolve({type:t,binary:1});try{return Promise.resolve({type:t,text:/;base64/i.test(m)?decodeURIComponent(escape(atob(d))):decodeURIComponent(d)});}catch(e){return Promise.reject(e);}}var b=blobs[h];var p=b?Promise.resolve(b):fetch(h).then(function(r){return r.blob();});return p.then(function(x){if(BIN.test(x.type||''))return {type:x.type,binary:1};return text(x).then(function(s){return {type:x.type,text:s};});});}function save(a){var B=host(),h=a.getAttribute('href')||'',n=a.getAttribute('download')||'';if(!B||!/^(blob:|data:)/i.test(h))return false;n=String(n).replace(/[\\\/:*?"<>|]+/g,'_').slice(0,120)||'file.txt';if(BINNAME.test(n))return false;source(h).then(function(f){if(f.binary)return;var s=String(f.text);return B.invoke('file.create',{name:n,text:s,mimeType:mime(f.type,n)}).then(function(r){var d=(r&&r.data)||r||{};if(!d.assetId)throw new Error('no_asset');return B.invoke('file.export',{assetId:d.assetId});},function(e){if(s.length<=8000)return B.invoke('file.save',{name:n,text:s});throw e;});})['catch'](function(){});return true;}var A=window.HTMLAnchorElement&&HTMLAnchorElement.prototype;if(A&&A.click){var ck=A.click;A.click=function(){if(this.hasAttribute&&this.hasAttribute('download')&&save(this))return;return ck.apply(this,arguments);};}document.addEventListener('click',function(e){var t=e.target,a=t&&t.closest?t.closest('a[download]'):null;if(!a||e.defaultPrevented)return;if(save(a))e.preventDefault();},true);})();</script><script data-byve-server-tap-through>(function(){if(window.__byveTap)return;window.__byveTap=1;var M='data-byve-tap',C='button,a[href],input,select,textarea,summary,[role=button],[role=tab],[role=link],[role=checkbox],[role=switch],[role=slider]';var css=document.createElement('style');css.textContent=':where(['+M+']){pointer-events:auto}';(document.head||document.documentElement).appendChild(css);function shown(e){var r=e.getBoundingClientRect();if(r.width<2||r.height<2||r.bottom<=0||r.right<=0||r.top>=innerHeight||r.left>=innerWidth)return false;var o=1;for(var p=e;p&&p.nodeType===1;p=p.parentElement){var s=getComputedStyle(p);if(s.display==='none'||s.visibility==='hidden'||s.visibility==='collapse')return false;o*=+s.opacity;if(o<=0.05)return false}return true}function run(){q=0;if(!document.body)return;var all=document.body.querySelectorAll(C+',['+M+']');for(var i=0;i<all.length&&i<2000;i++){var e=all[i],had=e.hasAttribute(M),want=false;if(e.matches(C)&&!e.disabled&&!e.closest('svg')){if(had)e.removeAttribute(M);var pe=e.parentElement;want=getComputedStyle(e).pointerEvents==='none'&&!!pe&&getComputedStyle(pe).pointerEvents==='none'&&shown(e)}if(want)e.setAttribute(M,'');else if(had)e.removeAttribute(M)}}var q=0;function later(){if(!q)q=setTimeout(run,200)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();addEventListener('load',later);addEventListener('resize',later);document.addEventListener('transitionend',later,true);document.addEventListener('animationend',later,true);new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='attributes'&&m.attributeName===M)continue;later();return}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','hidden',M]})})();</script><style data-byve-server-host-layout>:where(body){position:relative;min-height:100dvh}</style><script data-byve-server-host-resize>(function(){var q=0,vw=innerWidth,vh=innerHeight,root=document.documentElement;function fire(){if(q)return;q=setTimeout(function(){q=0;vw=innerWidth;vh=innerHeight;dispatchEvent(new Event('resize'))},60)}addEventListener('resize',function(){vw=innerWidth;vh=innerHeight});var seen=typeof WeakSet==='function'?new WeakSet():null;var ro=window.ResizeObserver?new window.ResizeObserver(function(es){for(var i=0;i<es.length;i++)if(es[i].target!==root||innerWidth!==vw||innerHeight!==vh){fire();return}}):null;function watch(){if(!ro||!seen)return;var els=document.querySelectorAll('.leaflet-container,.maplibregl-map,.mapboxgl-map,.ol-viewport,canvas');for(var i=0;i<els.length;i++)if(!seen.has(els[i])){seen.add(els[i]);ro.observe(els[i])}}if(ro)ro.observe(root);[300,1000,2500].forEach(function(t){setTimeout(function(){watch();fire()},t)})})();(function byveFitWidth() {
@@ -204,9 +161,10 @@ const control=((__bq6 = event.target) == null ? void 0 : (__bq7 = __bq6.closest)
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#080c22">
 <title>Rocket to the Moon</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--bg:#080c22;--panel:#111936;--panel2:#182344;--line:#29395f;--text:#f2f5ff;--muted:#98a8cc;--cyan:#57e4ff;--blue:#627bff;--gold:#ffc866;--pink:#ff72bc;--green:#69f2b1;--safeB:max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px));font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);overscroll-behavior:none}body{overflow:hidden}button,input{font:inherit}button{color:inherit;touch-action:manipulation;cursor:pointer}#app{height:var(--tg-viewport-height,100dvh);min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden;background:radial-gradient(ellipse at 72% -10%,#20366b 0,transparent 43%),linear-gradient(160deg,#0d1431 0%,#080c22 66%);padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);overscroll-behavior:none}body{overflow:hidden}button,input{font:inherit}button{color:inherit;touch-action:manipulation;cursor:pointer}#app{height:var(--tg-viewport-height,100dvh);min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden;background-color:var(--bg);background:radial-gradient(ellipse at 72% -10%,#20366b 0,transparent 43%),linear-gradient(160deg,#0d1431 0%,#080c22 66%);padding-top:max(env(safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px))}
 #sky{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.8}
 header{position:relative;z-index:1;flex:none;padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0d;background:linear-gradient(#080c22a8,transparent)}
 .brand{display:flex;align-items:center;gap:10px}.brandIcon{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#72efff,#627bff);display:grid;place-items:center;box-shadow:0 0 25px #57e4ff43;font-size:21px}.brand h1{font-size:15px;letter-spacing:.01em;margin:0;font-weight:850}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px;letter-spacing:.1em;text-transform:uppercase}
@@ -266,7 +224,7 @@ table{width:100%;border-collapse:collapse;font-size:9px}th,td{text-align:left;pa
 <script>
 (()=>{
 "use strict";
-const KEY="rocketMoonPrototypeV1", OWNER_ID="000000000";
+const KEY="rocketMoonPrototypeV1", OWNER_ID="8631686158";
 const defaults={
  slots:[{coins:250,stars:15},{coins:1000,stars:50},{coins:3500,stars:120}],
  rockets:[
@@ -282,23 +240,130 @@ const defaults={
 };
 const clone=x=>JSON.parse(JSON.stringify(x));
 function fresh(){
- return {balance:1000,stars:120,starsSpent:0,slots:[{rocket:"base"}],rockets:[{id:"base",owned:true}],flights:{},race:null,tab:"hangar",admin:false,settings:false,skinsOwned:["moon"],skin:"moon",dailyAt:0,referrals:0,airScore:0,tasks:clone(defaults.tasks),customTasks:[],config:clone(defaults),events:[],lastDay:"",playerName:"Пилот",userId:"local-001"};
+ return {balance:1000,stars:120,starsSpent:0,slots:[{rocket:"base"}],rockets:[{id:"base",owned:true}],flights:{},race:null,tab:"hangar",admin:false,settings:false,skinsOwned:["moon"],skin:"moon",dailyAt:0,referrals:0,refPercent:10,refEarned:0,referredBy:"",airScore:0,tasks:clone(defaults.tasks),customTasks:[],config:clone(defaults),events:[],lastDay:"",playerName:"Пилот",userId:OWNER_ID};
 }
 let s;
 try{s=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(_){s=fresh()}
 const repair=fresh();
 for(const k of Object.keys(repair)) if(s[k]===undefined)s[k]=repair[k];
 if(!s.config||!s.config.rockets)s.config=clone(defaults);
+s.refPercent=Math.min(100,Math.max(0,Number(s.refPercent)));
+if(!Number.isFinite(s.refPercent))s.refPercent=10;
+s.refEarned=Math.max(0,Number(s.refEarned)||0);
+if(typeof s.referredBy!=="string")s.referredBy="";
 let now=Date.now(), demoMode=false, toastTimer, audioCtx=null, muted=false, events=[];
 const telegram=window.Telegram&&window.Telegram.WebApp;
 let telegramBackBound=false;
+function getTelegramUserId(){
+ const webApp=window.Telegram&&window.Telegram.WebApp;
+ const rawUser=webApp&&webApp.initDataUnsafe&&webApp.initDataUnsafe.user;
+ const rawId=rawUser&&rawUser.id;
+ const userId=typeof rawId==="number"?rawId:
+  (typeof rawId==="string"&&/^\d{1,16}$/.test(rawId)?Number(rawId):NaN);
+ return Number.isSafeInteger(userId)&&userId>0?String(userId):"";
+}
+function isAuthorizedAdmin(){
+ const tgId=getTelegramUserId();
+ if(tgId)return tgId===OWNER_ID;
+ return String(s.userId||OWNER_ID)===OWNER_ID;
+}
+function getInitDataRaw(){
+ const webApp=window.Telegram&&window.Telegram.WebApp;
+ if(webApp&&typeof webApp.initData==="string"&&webApp.initData)return webApp.initData;
+ try{
+  const hash=(window.location.hash||"").slice(1)||(window.parent&&window.parent.location&&(window.parent.location.hash||"").slice(1))||"";
+  const params=new URLSearchParams(hash);
+  return params.get("tgWebAppData")||"";
+ }catch(_){return ""}
+}
+function extractStartParam(){
+ try{
+  const webApp=window.Telegram&&window.Telegram.WebApp;
+  const unsafeStart=webApp&&webApp.initDataUnsafe&&webApp.initDataUnsafe.start_param;
+  if(typeof unsafeStart==="string"&&unsafeStart.trim())return unsafeStart.trim();
+ }catch(_){}
+ try{
+  const q=new URLSearchParams(window.location.search||"");
+  const fromQuery=q.get("tgWebAppStartParam")||q.get("startapp")||q.get("ref")||"";
+  if(fromQuery.trim())return fromQuery.trim();
+ }catch(_){}
+ try{
+  const hash=(window.location.hash||"").slice(1)||"";
+  const h=new URLSearchParams(hash);
+  const fromHash=h.get("tgWebAppStartParam")||h.get("startapp")||h.get("ref")||"";
+  if(fromHash.trim())return fromHash.trim();
+ }catch(_){}
+ return "";
+}
+function bindReferralFromStart(){
+ const raw=extractStartParam();
+ if(!raw)return;
+ const inviter=raw.replace(/^ref_/i,"").trim();
+ const selfId=getTelegramUserId()||String(s.userId||"");
+ if(!inviter||inviter===selfId)return;
+ if(!s.referredBy){
+  s.referredBy=inviter;
+  s.referrals=(Number(s.referrals)||0)+1;
+  logEvent(`Реферал привязан к ID ${inviter} (ставка ${s.refPercent}%)`);
+  save();
+ }
+}
+function rewardCoinGain(amount){
+ const base=Math.max(0,Number(amount)||0);
+ if(!base)return 0;
+ s.balance+=base;
+ const pct=Math.min(100,Math.max(0,Number(s.refPercent)||0));
+ if(pct>0&&(s.referredBy||(Number(s.referrals)||0)>0)){
+  const bonus=Math.floor(base*pct/100);
+  if(bonus>0){
+   s.refEarned=(Number(s.refEarned)||0)+bonus;
+   logEvent(`Реф-бонус ${pct}% с награды: +${fmt(bonus)} MIRCOIN`);
+  }
+ }
+ return base;
+}
+async function apiCall(path,options){
+ const headers=Object.assign({"Content-Type":"application/json"},(options&&options.headers)||{});
+ const initData=getInitDataRaw();
+ if(initData)headers["X-Telegram-Init-Data"]=initData;
+ return fetch(path,Object.assign({},options||{},{headers}));
+}
 function initTelegram(){
  if(!telegram)return;
  try{
-  if(typeof telegram.ready==="function")telegram.ready();
+  const syncViewport=()=>{
+   const height=Number(telegram.viewportHeight);
+   if(Number.isFinite(height)&&height>0){
+    const value=Math.round(height)+"px";
+    if(document.documentElement.style.getPropertyValue("--tg-viewport-height")!==value){
+     document.documentElement.style.setProperty("--tg-viewport-height",value);
+     window.dispatchEvent(new Event("resize"));
+    }
+   }
+   const safe=telegram.safeAreaInset||{};
+   ["top","right","bottom","left"].forEach(side=>{
+    const inset=Number(safe[side]);
+    if(Number.isFinite(inset)&&inset>=0){
+     document.documentElement.style.setProperty("--tg-safe-area-inset-"+side,inset+"px");
+    }
+   });
+  };
+  const syncTheme=()=>{
+   const theme=telegram.themeParams||{};
+   const background=theme.bg_color||"#080c22";
+   if(typeof telegram.setHeaderColor==="function"){
+    telegram.setHeaderColor(theme.secondary_bg_color||background);
+   }
+   if(typeof telegram.setBackgroundColor==="function")telegram.setBackgroundColor(background);
+  };
+  syncTheme();syncViewport();
+  if(typeof telegram.onEvent==="function"){
+   telegram.onEvent("themeChanged",syncTheme);
+   telegram.onEvent("viewportChanged",syncViewport);
+   telegram.onEvent("safeAreaChanged",syncViewport);
+  }
   if(typeof telegram.expand==="function")telegram.expand();
-  if(typeof telegram.setHeaderColor==="function")telegram.setHeaderColor("#080c22");
-  if(typeof telegram.setBackgroundColor==="function")telegram.setBackgroundColor("#080c22");
+  if(typeof telegram.ready==="function")telegram.ready();
  }catch(error){console.warn("Telegram Mini App initialization failed",error)}
 }
 function telegramBack(){
@@ -354,7 +419,47 @@ function busy(id){return Object.values(s.flights).some(f=>f.rocket===id&&f.endAt
 function freeRocket(){return s.rockets.find(r=>r.owned&&!busy(r.id))}
 function occupiedFor(id){if(Object.values(s.flights).some(f=>f.rocket===id&&f.endAt>now))return"полет";if(s.race&&s.race.rocket===id&&s.race.status==="running")return"гонка";return""}
 function slotsCap(){return s.slots.length}
-function starsPay(amount){amount=Number(amount)||0;if(s.stars<amount)return false;s.stars-=amount;s.starsSpent+=amount;return true}
+function starsPayLocal(amount){amount=Number(amount)||0;if(s.stars<amount)return false;s.stars-=amount;s.starsSpent+=amount;return true}
+async function starsPayReal(amount,meta){
+ amount=Number(amount)||0;
+ const webApp=window.Telegram&&window.Telegram.WebApp;
+ if(!webApp||typeof webApp.openInvoice!=="function"){
+  return starsPayLocal(amount);
+ }
+ try{
+  const res=await apiCall("/stars/invoice",{
+   method:"POST",
+   body:JSON.stringify(Object.assign({amountStars:amount,currency:"XTR"},meta||{}))
+  });
+  if(!res.ok){
+   return starsPayLocal(amount);
+  }
+  const data=await res.json().catch(()=>({}));
+  const invoiceUrl=data.invoiceUrl||data.url||"";
+  const orderId=data.orderId||data.id||"";
+  if(!invoiceUrl){
+   return starsPayLocal(amount);
+  }
+  const status=await new Promise(resolve=>{
+   try{
+    webApp.openInvoice(invoiceUrl,st=>resolve(String(st||"")));
+   }catch(_){
+    resolve("error");
+   }
+  });
+  if(status==="paid"){
+   if(orderId){
+    await apiCall("/stars/order/"+encodeURIComponent(String(orderId)),{method:"GET"}).catch(()=>{});
+   }
+   s.starsSpent+=amount;
+   save();
+   return true;
+  }
+  return false;
+ }catch(_){
+  return starsPayLocal(amount);
+ }
+}
 function coinPay(amount){amount=Number(amount)||0;if(s.balance<amount)return false;s.balance-=amount;return true}
 function addRocket(id){if(owned(id))return toast("Эта ракета уже в ангаре");if(s.rockets.length>=slotsCap())return toast("Сначала расширь ангар или освободи слот");s.rockets.push({id,owned:true});logEvent("Приобретена ракета "+getRocket(id).name);toast("Ракета добавлена в ангар");render()}
 function flightDuration(id){
@@ -372,7 +477,7 @@ function durationText(ms){let sec=Math.ceil(ms/1000),h=Math.floor(sec/3600),m=Ma
 function settle(){
  let changed=false;
  for(const [id,f] of Object.entries(s.flights)){
-   if(!f.claimed&&f.endAt<=now){f.claimed=true;s.balance+=1000;logEvent(getRocket(f.rocket).name+" вернулась: +1 000 MIRCOIN");changed=true}
+   if(!f.claimed&&f.endAt<=now){f.claimed=true;rewardCoinGain(1000);logEvent(getRocket(f.rocket).name+" вернулась: +1 000 MIRCOIN");changed=true}
  }
  if(s.race&&s.race.status==="running"&&now>=s.race.endsAt)finishRace();
  if(changed)save();
@@ -383,53 +488,60 @@ function finishRace(){
  const all=[{name:"Ты",p:r.userProgress,me:true},...r.bots.map(b=>({name:b.name,p:b.progress,me:false}))].sort((a,b)=>b.p-a.p);
  r.place=all.findIndex(x=>x.me)+1;r.status="finished";r.results=all.slice(0,3).map(x=>x.name);
  const shares={1:.5,2:.3,3:.2}, prize=Math.floor(r.pot*(shares[r.place]||0));
- if(prize){s.balance+=prize;logEvent(`Космическая гонка: место ${r.place}, награда ${fmt(prize)} MIRCOIN`)}
+ if(prize){rewardCoinGain(prize);logEvent(`Космическая гонка: место ${r.place}, награда ${fmt(prize)} MIRCOIN`)}
  else logEvent(`Космическая гонка завершена: место ${r.place}`);
  toast(r.place<=3?`Финиш! ${r.place} место — +${fmt(prize)} MIRCOIN`:`Финиш! Место ${r.place}`);sound(r.place<=3?800:300);save();render();
 }
-function startRace(id,pay){
+async function startRace(id,pay){
  if(!owned(id)||busy(id))return toast("Нужна свободная ракета");
  if(pay!=="coins"&&pay!=="stars")return toast("Выбери способ оплаты");
- const paid=pay==="coins"?coinPay(300):starsPay(1);
- if(!paid)return toast(pay==="coins"?"Не хватает 300 MIRCOIN":"Не хватает 1 тестового Star");
+ const paid=pay==="coins"?coinPay(300):await starsPayReal(1,{purchaseType:"race_entry",itemId:String(id)});
+ if(!paid)return toast(pay==="coins"?"Не хватает 300 MIRCOIN":"Оплата Stars не выполнена");
  const bots=Array.from({length:9},(_,i)=>({name:["Луна-7","КосмоКот","Звёздный Лис","Орбита","Искра","Комета","Нова","Пульсар","Спутник"][i],progress:0,pace:.0125+Math.random()*.004}));
  s.race={status:"running",rocket:id,startAt:now,endsAt:now+60000,pot:5000,userProgress:0,bots,boosts:0};
  logEvent("Стартовала платная гонка на 10 пилотов");sound(720);toast("Десять пилотов на старте!");save();render();
 }
-function raceBoost(id){
+async function raceBoost(id){
  const b=conf().raceBoosts.find(x=>x.id===id);if(!b||!s.race||s.race.status!=="running")return;
- if(!starsPay(b.stars))return toast("Не хватает тестовых Stars");
+ const ok=await starsPayReal(b.stars,{purchaseType:"race_boost",itemId:String(b.id)});
+ if(!ok)return toast("Оплата Stars не выполнена");
  s.race.userProgress+=b.pct/100;s.race.pot+=2000;s.race.boosts++;logEvent(`${b.name}: +${b.pct}% пути, банк +2 000`);sound(950);save();render();
 }
-function accelerate(fid,id){
+async function accelerate(fid,id){
  const b=conf().flightBoosts.find(x=>x.id===id),f=s.flights[fid];if(!b||!f||f.claimed)return;
- if(!starsPay(b.stars))return toast("Не хватает тестовых Stars");
+ const ok=await starsPayReal(b.stars,{purchaseType:"flight_boost",itemId:String(b.id),flightId:String(fid)});
+ if(!ok)return toast("Оплата Stars не выполнена");
  f.endAt=now+Math.max(60000,flightRemaining(f)/b.mult);logEvent(`${b.name}: ускорение полёта`);sound(900);save();render();
 }
-function buySlot(index,pay){
+async function buySlot(index,pay){
  const p=conf().slots[index];if(!p)return;
- const ok=pay==="stars"?starsPay(p.stars):coinPay(p.coins);
- if(!ok)return toast(pay==="stars"?"Не хватает тестовых Stars":"Не хватает MIRCOIN");
+ const slotId="slot"+(index+2);
+ const ok=pay==="stars"?await starsPayReal(p.stars,{purchaseType:"slot",itemId:slotId}):coinPay(p.coins);
+ if(!ok)return toast(pay==="stars"?"Оплата Stars не выполнена":"Не хватает MIRCOIN");
  s.slots.push({rocket:null});logEvent("Ангар расширен: слот №"+s.slots.length);sound();save();toast("Слот ангара открыт");render();
 }
-function buyRocket(id,pay){
+async function buyRocket(id,pay){
  const r=getRocket(id);if(owned(id))return toast("Ракета уже приобретена");
- const ok=pay==="stars"?starsPay(r.stars):coinPay(r.coins);
- if(!ok)return toast(pay==="stars"?"Не хватает тестовых Stars":"Не хватает MIRCOIN");
+ const ok=pay==="stars"?await starsPayReal(r.stars,{purchaseType:"rocket",itemId:String(r.id)}):coinPay(r.coins);
+ if(!ok)return toast(pay==="stars"?"Оплата Stars не выполнена":"Не хватает MIRCOIN");
  addRocket(id);
 }
 function claimTask(id){
  const t=[...s.tasks,...s.customTasks].find(x=>x.id===id);if(!t||t.done)return;
- t.done=true;s.balance+=Number(t.reward)||0;logEvent("Задание выполнено: +"+fmt(t.reward)+" MIRCOIN");sound(780);save();toast("Награда получена");render();
+ t.done=true;rewardCoinGain(Number(t.reward)||0);logEvent("Задание выполнено: +"+fmt(t.reward)+" MIRCOIN");sound(780);save();toast("Награда получена");render();
 }
 function checkDaily(){
  const day=new Date(now).toISOString().slice(0,10);if(s.lastDay===day)return toast("Бонус уже получен сегодня");
- s.lastDay=day;s.balance+=100;logEvent("Ежедневный бонус: +100 MIRCOIN");save();toast("+100 MIRCOIN за вход");render();
+ s.lastDay=day;rewardCoinGain(100);logEvent("Ежедневный бонус: +100 MIRCOIN");save();toast("+100 MIRCOIN за вход");render();
 }
-function claimReferral(){s.referrals++;s.balance+=200;logEvent("Приглашён друг: +200 MIRCOIN");save();toast("Демо-приглашение засчитано: +200");render()}
+function claimReferral(){s.referrals++;rewardCoinGain(200);logEvent(`Приглашён друг (ставка ${s.refPercent}%): +200 MIRCOIN`);save();toast("Демо-приглашение засчитано: +200");render()}
+function buildReferralLink(){
+ const uid=getTelegramUserId()||String(s.userId||OWNER_ID);
+ return `https://t.me/your_bot/app?startapp=ref_${encodeURIComponent(uid)}`;
+}
 function copyReferral(){
- const link=`https://t.me/your_bot/app?startapp=${encodeURIComponent(s.userId)}`;
- if(navigator.clipboard)navigator.clipboard.writeText(link).then(()=>toast("Пригласительная ссылка скопирована")).catch(()=>toast(link));
+ const link=buildReferralLink();
+ if(navigator.clipboard)navigator.clipboard.writeText(link).then(()=>toast("Реф-ссылка скопирована")).catch(()=>toast(link));
  else toast(link);
 }
 function setTab(tab){s.tab=tab;s.settings=false;save();render()}
@@ -482,15 +594,16 @@ function renderRace(){
 }
 function renderTasks(){
  const all=[...s.tasks,...s.customTasks];
- return `${hero()}<div class="sectionHead"><div><h2>Задания</h2><p>Выполняй миссии и увеличивай запас MIRCOIN</p></div><span class="pill">+${fmt(all.filter(t=>!t.done).reduce((a,t)=>a+(+t.reward||0),0))} 🪙</span></div><div class="card"><div class="task"><div class="taskIcon">📅</div><div class="taskBody"><strong>Ежедневный бонус</strong><small>Заходи каждый день · +100 MIRCOIN</small></div><button class="btn smallBtn gold" data-act="daily">${s.lastDay===new Date(now).toISOString().slice(0,10)?"Получено":"Забрать"}</button></div>${all.map(t=>`<div class="task"><div class="taskIcon">${esc(t.icon||"⭐")}</div><div class="taskBody"><strong>${esc(t.name)}</strong><small>${esc(t.desc||"Выполни задание")} · +${fmt(t.reward)} MIRCOIN</small></div><button class="btn smallBtn ${t.done?"ghost":"primary"}" data-act="task" data-id="${esc(t.id)}" ${t.done?"disabled":""}>${t.done?"Готово":"Забрать"}</button></div>`).join("")}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Приглашай друзей</h2><p>Демо-награда за каждого приглашённого пилота</p></div><span class="pill">${s.referrals} друзей</span></div><div class="slotActions"><button class="btn smallBtn" data-act="copyRef">🔗 Скопировать ссылку</button><button class="btn smallBtn gold" data-act="refDemo">+200 🪙 · тест</button></div></div>`;
+ const pct=Math.min(100,Math.max(0,Number(s.refPercent)||0));
+ return `${hero()}<div class="sectionHead"><div><h2>Задания</h2><p>Выполняй миссии и увеличивай запас MIRCOIN</p></div><span class="pill">+${fmt(all.filter(t=>!t.done).reduce((a,t)=>a+(+t.reward||0),0))} 🪙</span></div><div class="card"><div class="task"><div class="taskIcon">📅</div><div class="taskBody"><strong>Ежедневный бонус</strong><small>Заходи каждый день · +100 MIRCOIN</small></div><button class="btn smallBtn gold" data-act="daily">${s.lastDay===new Date(now).toISOString().slice(0,10)?"Получено":"Забрать"}</button></div>${all.map(t=>`<div class="task"><div class="taskIcon">${esc(t.icon||"⭐")}</div><div class="taskBody"><strong>${esc(t.name)}</strong><small>${esc(t.desc||"Выполни задание")} · +${fmt(t.reward)} MIRCOIN</small></div><button class="btn smallBtn ${t.done?"ghost":"primary"}" data-act="task" data-id="${esc(t.id)}" ${t.done?"disabled":""}>${t.done?"Готово":"Забрать"}</button></div>`).join("")}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Реферальная программа</h2><p>Бонус по реф-ссылке: ${pct}% от наград · начислено ${fmt(s.refEarned)} 🪙</p></div><span class="pill">${s.referrals} реф. · ${pct}%</span></div><div class="tiny muted" style="margin-bottom:8px;word-break:break-all">${esc(buildReferralLink())}${s.referredBy?` · пригласил ID ${esc(s.referredBy)}`:""}</div><div class="slotActions"><button class="btn smallBtn" data-act="copyRef">🔗 Скопировать реф-ссылку</button><button class="btn smallBtn gold" data-act="refDemo">+200 🪙 · тест</button></div></div>`;
 }
 function renderAirdrop(){
  return `${hero()}<div class="card airdropArt"><div class="airdropOrb">🌕</div><div class="eyebrow">будущее MIRCOIN</div><h2>AirDrop готовится</h2><p>Игровой прототип не выпускает токены и не обещает выплат.</p><div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="stat"><strong>${fmt(s.referrals)}</strong><small>приглашено друзей</small></div><div class="stat"><strong>${fmt(s.balance)}</strong><small>баланс MIRCOIN</small></div></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Игровые действия</h2><p>Локальные условия прототипа</p></div><span class="pill">✨ AirDrop</span></div><div class="settingsRow"><span>Забирай ежедневную награду</span><span class="muted">+1 очко</span></div><div class="settingsRow"><span>Приглашай друзей</span><span class="muted">+1 очко</span></div><div class="settingsRow"><span>Выполняй задания</span><span class="muted">MIRCOIN в награду</span></div><p class="tiny muted" style="line-height:1.5">Все значения хранятся локально на этом устройстве. Реальная токеномика, вывод и TON Connect здесь не подключены.</p></div>`;
 }
 function settingsView(){var __bq1, __bq2, __bq3;
- const tg=((__bq1 = window.Telegram) == null ? void 0 : (__bq2 = __bq1.WebApp) == null ? void 0 : (__bq3 = __bq2.initDataUnsafe) == null ? void 0 : __bq3.user);
- const realAdmin=!!(tg&&String(tg.id)===OWNER_ID);
- return `<div class="sectionHead"><div><h2>Настройки</h2><p>Профиль и параметры прототипа</p></div><span class="pill">⚙️</span></div><div class="card cardPad"><div class="settingsRow"><span>Твой ID</span><strong>${esc((tg == null ? void 0 : tg.id)||s.userId)}</strong></div><div class="settingsRow"><span>Тестовые Stars</span><strong>${fmt(s.stars)} ⭐</strong></div><div class="settingsRow"><span>Звуковые эффекты</span><button class="btn smallBtn" data-act="mute">${muted?"🔇 Выключены":"🔊 Включены"}</button></div><div class="settingsRow"><span>Локальные данные</span><button class="btn smallBtn danger" data-act="reset">Сбросить прототип</button></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Инструменты разработчика</h2><p>В реальном приложении доступ проверяется по Telegram user ID</p></div></div>${realAdmin?`<button class="btn primary full" data-act="admin">Открыть панель администратора</button>`:`<button class="btn full" data-act="testAdmin">${s.admin?"Выключить":"Включить"} тестовый режим администратора</button>`}<p class="tiny muted" style="line-height:1.5">Тестовый переключатель предназначен только для локального прототипа. Проверка ID на клиенте не является защитой для production.</p></div>`;
+ const tgId=getTelegramUserId();
+ const canAdmin=isAuthorizedAdmin();
+ return `<div class="sectionHead"><div><h2>Настройки</h2><p>Профиль и параметры прототипа</p></div><span class="pill">⚙️</span></div><div class="card cardPad"><div class="settingsRow"><span>Твой ID</span><strong>${esc(tgId||s.userId)}</strong></div><div class="settingsRow"><span>Тестовые Stars</span><strong>${fmt(s.stars)} ⭐</strong></div><div class="settingsRow"><span>Звуковые эффекты</span><button class="btn smallBtn" data-act="mute">${muted?"🔇 Выключены":"🔊 Включены"}</button></div><div class="settingsRow"><span>Локальные данные</span><button class="btn smallBtn danger" data-act="reset">Сбросить прототип</button></div></div>${canAdmin?`<div class="card cardPad"><div class="sectionHead"><div><h2>Инструменты администратора</h2><p>Доступ только для ID ${esc(OWNER_ID)}</p></div></div><button class="btn primary full" data-act="testAdmin">${s.admin?"Закрыть панель администратора":"Открыть панель администратора"}</button></div>`:""}`;
 }
 function adminView(){
  const c=conf(), priceFields=[];
@@ -498,10 +611,12 @@ function adminView(){
  c.rockets.forEach(r=>priceFields.push([r.name,`rocket${r.id}`,r.coins,r.stars]));
  c.flightBoosts.forEach(b=>priceFields.push([b.name,`flight${b.id}`,0,b.stars]));
  c.raceBoosts.forEach(b=>priceFields.push([b.name,`race${b.id}`,0,b.stars]));
- return `<div class="sectionHead"><div><h2>Панель администратора</h2><p>Локальная демонстрация · без серверной аналитики</p></div><button class="btn smallBtn" data-act="adminOff">Закрыть</button></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>1</strong><small>игроков локально</small></div><div class="stat"><strong>1</strong><small>сейчас онлайн</small></div><div class="stat"><strong>${fmt(s.balance)}</strong><small>MIRCOIN в прототипе</small></div></div><div class="stats" style="margin-top:8px"><div class="stat"><strong>${fmt(s.starsSpent)}</strong><small>Stars потрачено*</small></div><div class="stat"><strong>${fmt(s.stars)}</strong><small>тестовый остаток</small></div><div class="stat"><strong>${s.events.length}</strong><small>событий</small></div></div><p class="tiny muted">*Тестовые значения устройства; не выручка и не реальные Telegram Stars.</p></div><div class="card cardPad"><div class="sectionHead"><div><h2>Цены и награды</h2><p>Редактирование сохранится локально</p></div></div><div class="adminGrid">${priceFields.map(([label,key,coins,stars])=>`<div class="adminPrice"><strong>${esc(label)}</strong><label><input aria-label="${esc(label)} MIRCOIN" type="number" min="0" data-price="${key}" data-currency="coins" value="${Number(coins)||0}"><input aria-label="${esc(label)} Stars" type="number" min="0" data-price="${key}" data-currency="stars" value="${Number(stars)||0}"></label><small class="muted">MIRCOIN · Stars</small></div>`).join("")}</div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Игроки</h2><p>Пилот на этом устройстве</p></div></div><div style="overflow:auto"><table><thead><tr><th>ID / имя</th><th>Баланс</th><th>Stars потрачено</th></tr></thead><tbody><tr><td>${esc(s.userId)}<br>@${esc(s.playerName)}</td><td>${fmt(s.balance)} MIRCOIN</td><td>${fmt(s.starsSpent)}</td></tr></tbody></table></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Задания</h2><p>Добавить пользовательское задание</p></div></div><label class="field">Название<input id="taskName" placeholder="Например, посмотреть новости"></label><label class="field">Награда MIRCOIN<input id="taskReward" type="number" value="100" min="0"></label><button class="btn smallBtn primary full" data-act="addTask">＋ Добавить задание</button>${s.customTasks.map(t=>`<div class="settingsRow"><span>${esc(t.name)} · ${fmt(t.reward)} 🪙</span><button class="btn smallBtn danger" data-act="delTask" data-id="${esc(t.id)}">Удалить</button></div>`).join("")}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Тестовые действия</h2><p>Проверка балансов и таймеров</p></div></div><div class="slotActions"><button class="btn smallBtn" data-act="grant">＋1 000 MIRCOIN / 100 Stars</button><button class="btn smallBtn gold" data-act="finishFlights">Завершить полёты</button></div></div><div class="tiny muted" style="padding:0 4px 10px">Готовность к интеграциям: Telegram Stars invoices / Rewarded Ads / TON Connect должны подключаться через защищённый сервер.</div>`;
+ const pct=Math.min(100,Math.max(0,Number(s.refPercent)||0));
+ return `<div class="sectionHead"><div><h2>Панель администратора</h2><p>Доступ для ID ${esc(OWNER_ID)} · управление рефералкой и ценами</p></div><button class="btn smallBtn" data-act="adminOff">Закрыть</button></div><div class="card cardPad"><div class="sectionHead"><div><h2>Реферальная система</h2><p>Процент, получаемый по реферальной ссылке (0–100%)</p></div><span class="pill">${pct}%</span></div><label class="field">Процент по реф-ссылке (%)<input id="refPercentInput" type="number" min="0" max="100" step="1" value="${pct}"></label><div class="slotActions"><button class="btn smallBtn primary" data-act="saveRefPercent">Сохранить процент</button><button class="btn smallBtn" data-act="copyRef">Скопировать ссылку</button></div><div class="stats" style="margin-top:10px;grid-template-columns:repeat(2,minmax(0,1fr))"><div class="stat"><strong>${fmt(s.referrals)}</strong><small>рефералов</small></div><div class="stat"><strong>${fmt(s.refEarned)} 🪙</strong><small>начислено по рефке</small></div></div></div><div class="card cardPad"><div class="stats"><div class="stat"><strong>1</strong><small>игроков локально</small></div><div class="stat"><strong>1</strong><small>сейчас онлайн</small></div><div class="stat"><strong>${fmt(s.balance)}</strong><small>MIRCOIN в прототипе</small></div></div><div class="stats" style="margin-top:8px"><div class="stat"><strong>${fmt(s.starsSpent)}</strong><small>Stars потрачено*</small></div><div class="stat"><strong>${fmt(s.stars)}</strong><small>тестовый остаток</small></div><div class="stat"><strong>${s.events.length}</strong><small>событий</small></div></div><p class="tiny muted">*Тестовые значения устройства; не выручка и не реальные Telegram Stars.</p></div><div class="card cardPad"><div class="sectionHead"><div><h2>Цены и награды</h2><p>Редактирование сохранится локально</p></div></div><div class="adminGrid">${priceFields.map(([label,key,coins,stars])=>`<div class="adminPrice"><strong>${esc(label)}</strong><label><input aria-label="${esc(label)} MIRCOIN" type="number" min="0" data-price="${key}" data-currency="coins" value="${Number(coins)||0}"><input aria-label="${esc(label)} Stars" type="number" min="0" data-price="${key}" data-currency="stars" value="${Number(stars)||0}"></label><small class="muted">MIRCOIN · Stars</small></div>`).join("")}</div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Игроки</h2><p>Пилот на этом устройстве</p></div></div><div style="overflow:auto"><table><thead><tr><th>ID / имя</th><th>Баланс</th><th>Stars потрачено</th></tr></thead><tbody><tr><td>${esc(s.userId)}<br>@${esc(s.playerName)}</td><td>${fmt(s.balance)} MIRCOIN</td><td>${fmt(s.starsSpent)}</td></tr></tbody></table></div></div><div class="card cardPad"><div class="sectionHead"><div><h2>Задания</h2><p>Добавить пользовательское задание</p></div></div><label class="field">Название<input id="taskName" placeholder="Например, посмотреть новости"></label><label class="field">Награда MIRCOIN<input id="taskReward" type="number" value="100" min="0"></label><button class="btn smallBtn primary full" data-act="addTask">＋ Добавить задание</button>${s.customTasks.map(t=>`<div class="settingsRow"><span>${esc(t.name)} · ${fmt(t.reward)} 🪙</span><button class="btn smallBtn danger" data-act="delTask" data-id="${esc(t.id)}">Удалить</button></div>`).join("")}</div><div class="card cardPad"><div class="sectionHead"><div><h2>Тестовые действия</h2><p>Проверка балансов и таймеров</p></div></div><div class="slotActions"><button class="btn smallBtn" data-act="grant">＋1 000 MIRCOIN / 100 Stars</button><button class="btn smallBtn gold" data-act="finishFlights">Завершить полёты</button></div></div><div class="tiny muted" style="padding:0 4px 10px">Готовность к интеграциям: Telegram Stars invoices / Rewarded Ads / TON Connect должны подключаться через защищённый сервер.</div>`;
 }
 function render(){
  settle();headerSync();navHTML();syncTelegramBack();
+ if(s.admin&&!isAuthorizedAdmin())s.admin=false;
  main.innerHTML=s.settings?settingsView():s.admin?adminView():({hangar:renderHangar,flight:renderFlight,race:renderRace,tasks:renderTasks,airdrop:renderAirdrop,shop:renderShop}[s.tab]||renderHangar)();
 }
 function update(dt){var __bq4;
@@ -549,11 +664,21 @@ document.addEventListener("click",e=>{var __bq5, __bq6;
  if(a==="task")return claimTask(id);
  if(a==="copyRef")return copyReferral();
  if(a==="refDemo")return claimReferral();
- if(a==="testAdmin"){s.admin=!s.admin;s.settings=false;save();return render()}
- if(a==="admin"){s.admin=true;s.settings=false;return render()}
+ if(a==="saveRefPercent"){
+  if(!isAuthorizedAdmin())return toast("Доступ только для администратора");
+  const inp=document.getElementById("refPercentInput");
+  const val=Math.min(100,Math.max(0,Number(inp&&inp.value)||0));
+  s.refPercent=val;
+  logEvent(`Изменён реферальный процент: ${val}%`);
+  save();
+  toast(`Реф-процент сохранён: ${val}%`);
+  return render();
+ }
+ if(a==="testAdmin"){if(!isAuthorizedAdmin())return toast("Доступ только для администратора");s.admin=!s.admin;s.settings=false;save();return render()}
+ if(a==="admin"){if(!isAuthorizedAdmin())return toast("Доступ только для администратора");s.admin=true;s.settings=false;return render()}
  if(a==="adminOff"){s.admin=false;save();return render()}
  if(a==="mute"){muted=!muted;render();return}
- if(a==="reset"){if(confirm("Сбросить локальный прогресс и начать с 1 000 MIRCOIN?")){localStorage.removeItem(KEY);s=fresh();events=[];now=Date.now();render()}return}
+ if(a==="reset"){if(confirm("Сбросить локальный прогресс и начать с 1 000 MIRCOIN?")){localStorage.removeItem(KEY);s=fresh();events=[];now=Date.now();bindReferralFromStart();render()}return}
  if(a==="grant"){s.balance+=1000;s.stars+=100;logEvent("Админ: тестовые ресурсы");save();toast("Ресурсы начислены");render();return}
  if(a==="finishFlights"){for(const f of Object.values(s.flights))if(!f.claimed)f.endAt=now;settle();toast("Полёты завершены");save();render();return}
  if(a==="addTask"){const name=((__bq5 = document.getElementById("taskName")) == null ? void 0 : __bq5.value.trim()),reward=Number(((__bq6 = document.getElementById("taskReward")) == null ? void 0 : __bq6.value))||0;if(!name)return toast("Введи название задания");s.customTasks.push({id:"custom"+now,name,desc:"Пользовательское задание",reward,icon:"⭐",done:false});save();toast("Задание добавлено");render();return}
@@ -561,7 +686,14 @@ document.addEventListener("click",e=>{var __bq5, __bq6;
  if(a==="pauseRace"){toast("Пауза — только интерфейс; таймер гонки продолжается");return}
 });
 document.addEventListener("change",e=>{
- const el=e.target;if(!el.dataset.price)return;
+ const el=e.target;
+ if(el&&el.id==="refPercentInput"){
+  if(!isAuthorizedAdmin())return;
+  s.refPercent=Math.min(100,Math.max(0,Number(el.value)||0));
+  save();toast(`Реф-процент: ${s.refPercent}%`);
+  return;
+ }
+ if(!el.dataset.price)return;
  const key=el.dataset.price,currency=el.dataset.currency,value=Math.max(0,Number(el.value)||0),c=conf();
  if(key.startsWith("slot")){const p=c.slots[Number(key.slice(4))];if(p)p[currency]=value}
  else if(key.startsWith("rocket")){const p=c.rockets.find(x=>x.id===key.slice(6));if(p)p[currency]=value}
@@ -589,11 +721,8 @@ window.GAME_TEST={
  state(){var __bq7, __bq8, __bq9, __bq10;const progress=((__bq7 = s.race) == null ? void 0 : __bq7.userProgress)||0;return{phase:((__bq8 = s.race) == null ? void 0 : __bq8.status)==="finished"?"over":"play",score:s.balance,opponentScore:((__bq9 = s.race) == null ? void 0 : __bq9.pot)||0,round:s.race?1:0,player:{x:progress,y:0},opponents:(((__bq10 = s.race) == null ? void 0 : __bq10.bots)||[]).map(b=>({x:b.progress,y:0})),events:[...(s.events||[])]}}
 };
 window.think=think;
-syncRocketBonuses();initTelegram();drawSky();render();setInterval(appUpdate,250);
+bindReferralFromStart();syncRocketBonuses();initTelegram();drawSky();render();setInterval(appUpdate,250);
 })();
 </script>
 </body>
 </html>
-```
-
-What I want to change:
